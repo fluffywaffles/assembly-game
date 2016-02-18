@@ -143,10 +143,59 @@ HalfComp PROC USES ebx edx comp:FXPT, dim:DWORD
   ret
 HalfComp ENDP
 
+CalcSrcDims PROC USES ebx dstX:DWORD, dstY:DWORD, cosa:FXPT, sina:FXPT
+  LOCAL srcX:DWORD, srcY:DWORD
+
+  invoke int2fxpt, dstX
+  mov ebx, eax
+
+  mov eax, ebx
+  imul cosa
+  mov srcX, edx ; srcX = dstX*cosa
+
+  mov eax, ebx
+  imul sina
+  neg edx
+  mov srcY, edx ; srcY = -dstX*sina
+
+  invoke int2fxpt, dstY
+  mov ebx, eax
+
+  mov eax, ebx
+  imul sina
+  add srcX, edx ; srcX = dstX*cosa + dstY*sina
+
+  mov eax, dstY
+  imul cosa
+  add srcY, edx ; srcY = -dstX*sina + dstY*cosa
+
+  invoke fxpt2int, srcY
+  mov edx, eax          ; edx = int(srcY)
+  invoke fxpt2int, srcX ; eax = int(srcX)
+
+  ret
+CalcSrcDims ENDP
+
+Within PROC USES esi centerpoint:DWORD, lbound:DWORD, hbound:DWORD
+  mov eax, 0
+  mov esi, centerpoint
+
+  cmp esi, lbound
+  jl  false
+
+  cmp esi, hbound
+  jge false
+
+  inc eax
+  false:
+    ret
+Within ENDP
+
 RotateBlit PROC lpBmp:PTR EECS205BITMAP, xcenter:DWORD, ycenter:DWORD, angle:FXPT
   LOCAL cosa:FXPT, sina:FXPT
   LOCAL shiftX:DWORD, shiftY:DWORD
   LOCAL dstWidth:DWORD, dstHeight:DWORD
+  LOCAL dstX:DWORD, dstY:DWORD, srcX:DWORD, srcY:DWORD, drawX:DWORD, drawY:DWORD
 
   ; Unpack bitmap
   ;---------------------------------------
@@ -181,6 +230,60 @@ RotateBlit PROC lpBmp:PTR EECS205BITMAP, xcenter:DWORD, ycenter:DWORD, angle:FXP
 
   ; Begin draw loop
   ;---------------------------------------
+  mov ebx, dstWidth
+  neg ebx
+
+  for_x:
+    for_x_eval:
+      cmp ebx, dstWidth
+      jge break_for_x
+    for_x_body:
+
+      for_y:
+        mov ecx, dstHeight
+        neg ecx
+        sub ecx, 1
+        for_y_eval:
+          cmp ecx, dstHeight
+          jge break_for_y
+        for_y_body:
+          invoke CalcSrcDims, dstX, dstY, cosa, sina
+          mov dstX, eax
+          mov dstY, edx
+
+          inc ecx ; inc here to avoid inf. loop when out of bounds
+
+          invoke Within, srcX, 0, _dwWidth
+          cmp eax, 1
+          jne for_y_eval
+
+          invoke Within, srcY, 0, _dwHeight
+          cmp eax, 1
+          jne for_y_eval
+
+          ;invoke CalcDrawCoord, xcenter, dstX, shiftX
+          ;mov drawX, eax
+          ;invoke CalcDrawCoord, ycenter, dstY, shiftY
+          ;mov drawY, eax
+
+          ;invoke Within, drawX, 0, 639
+          ;cmp eax, 1
+          ;jne for_y_eval
+
+          ;invoke Within, drawY, 0, 479
+          ;cmp eax, 1
+          ;jne for_y_eval
+
+          ;;; now draw the pixel
+          ;invoke PixelIndexAt, drawX, drawY
+          ;invoke PlotBitmap, drawX, drawY, eax
+
+          jmp for_y_eval
+      break_for_y:
+
+      inc ebx
+      jmp for_x_eval
+  break_for_x:
 
   ;; TODO
 
