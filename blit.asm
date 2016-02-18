@@ -75,8 +75,9 @@ PlotBitmap PROC USES eax esi x:DWORD, y:DWORD, index:DWORD
   mov al, BYTE PTR [esi] ; color at index
   cmp al, _bTransparent  ; check if transparent
   je  skip_plot          ; don't plot if transparent
-  invoke PLOT, x, y, eax
+  ;invoke PLOT, x, y, eax
   skip_plot:
+    invoke PLOT, x, y, 03h
     ret
 PlotBitmap ENDP
 
@@ -139,7 +140,8 @@ HalfComp PROC USES ebx edx comp:FXPT, dim:DWORD
   invoke int2fxpt, dim
   imul ebx
 
-  mov eax, edx
+  mov eax, edx ;; AHHH this is always 0
+  ; derp
   ret
 HalfComp ENDP
 
