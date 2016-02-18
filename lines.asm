@@ -33,6 +33,8 @@ SCREEN_X_MAX = 640
 SCREEN_Y_MIN = 0
 SCREEN_Y_MAX = 480
 
+sign_flip BYTE ?
+
 _x0 DWORD ?
 _x1 DWORD ?
 
@@ -52,26 +54,31 @@ fixed_j DWORD ?
 
 .CODE
 
-ToggleNeg PROC angle:FXPT
-  mov eax, angle
-  cmp angle, 0
-  jge finish
-  neg eax
-  finish:
-    ret
-ToggleNeg ENDP
-
 SintabIndex PROC USES edx angle:FXPT
-  invoke ToggleNeg, angle
+  mov  eax, angle
   mov  edx, PI_INC_RECIP
   imul edx
   mov  eax, edx
   ret
 SintabIndex ENDP
 
+AbsAngle PROC angle:FXPT
+  mov eax, angle
+
+  ifNegative:
+    cmp eax, 0
+    jge finish
+  add2Pi:
+    add eax, TWO_PI
+    jmp ifNegative
+
+  finish:
+    ret
+AbsAngle ENDP
+
 ReduceAngle PROC USES ebx ecx angle:FXPT
   mov eax, angle
-  mov ebx, 0 ; should neg? initially: no
+  mov bl, 0 ; should neg? initially: no
 
   ; Start reducing the angle by 2PI, then by PI, and then clamp to [0, PI/2)
   ifCanReduce2Pi:
@@ -84,26 +91,24 @@ ReduceAngle PROC USES ebx ecx angle:FXPT
     cmp eax, PI
     jl  clamp
   reducePi:
-    not ebx
+    not bl
     sub eax, PI
     jmp ifCanReducePi
   clamp:
     cmp eax, PI_HALF
     jl  finish
     ; PI - eax
-    sub eax, PI
-    neg eax    ; trust me
+    mov ecx, PI
+    sub ecx, eax
+    mov eax, ecx
   finish:
-    cmp ebx, 0 ; unless shouldNeg, return
-    je  r
-    flip:
-      neg eax  ; else neg
-    r:
-      ret
+    mov sign_flip, bl
+    ret
 ReduceAngle ENDP
 
 FixedSin PROC USES ebx esi angle:FXPT
-  invoke ReduceAngle, angle
+  invoke AbsAngle, angle
+  invoke ReduceAngle, eax
   mov angle, eax
 
   invoke SintabIndex, angle
@@ -114,8 +119,8 @@ FixedSin PROC USES ebx esi angle:FXPT
   mov ax, WORD PTR [ esi + 2 * ebx ] ; value at SINTAB[index]
 
   ; seriously trust me: the sign tells all
-  cmp angle, 0
-  jge finish
+  cmp sign_flip, 0
+  jne finish
 
   neg eax ; sometimes you just flip your shit
 
