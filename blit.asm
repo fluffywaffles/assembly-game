@@ -209,7 +209,7 @@ RotateBlit PROC lpBmp:PTR EECS205BITMAP, xcenter:DWORD, ycenter:DWORD, angle:FXP
   LOCAL cosa:FXPT, sina:FXPT
   LOCAL shiftX:DWORD, shiftY:DWORD
   LOCAL dstWidth:DWORD, dstHeight:DWORD
-  LOCAL dstX:DWORD, dstY:DWORD, srcX:DWORD, srcY:DWORD, drawX:DWORD, drawY:DWORD
+  LOCAL srcX:DWORD, srcY:DWORD, drawX:DWORD, drawY:DWORD
 
   ; Unpack bitmap
   ;---------------------------------------
@@ -261,11 +261,13 @@ RotateBlit PROC lpBmp:PTR EECS205BITMAP, xcenter:DWORD, ycenter:DWORD, angle:FXP
           cmp ecx, dstHeight
           jge break_for_y
         for_y_body:
-          invoke CalcSrcDims, dstX, dstY, cosa, sina
-          mov dstX, eax
-          mov dstY, edx
-
           inc ecx ; inc here to avoid inf. loop when out of bounds
+
+          invoke CalcSrcDims, ebx, ecx, cosa, sina
+          mov srcX, eax
+          mov srcY, edx
+
+          invoke PLOT, 10, ecx, 01ch
 
           invoke Within, srcX, 0, _dwWidth
           cmp eax, 1
@@ -275,22 +277,26 @@ RotateBlit PROC lpBmp:PTR EECS205BITMAP, xcenter:DWORD, ycenter:DWORD, angle:FXP
           cmp eax, 1
           jne for_y_eval
 
-          invoke CalcDrawCoord, xcenter, dstX, shiftX
+          invoke CalcDrawCoord, xcenter, ebx, shiftX
           mov drawX, eax
-          invoke CalcDrawCoord, ycenter, dstY, shiftY
+          invoke CalcDrawCoord, ycenter, ecx, shiftY
           mov drawY, eax
 
           invoke Within, drawX, 0, 639
           cmp eax, 1
           jne for_y_eval
 
+          invoke PLOT, drawX, 15, 0c0h
+
           invoke Within, drawY, 0, 479
           cmp eax, 1
           jne for_y_eval
 
+          invoke PLOT, 15, drawY, 0c0h
+
           ;;; now draw the pixel
-          invoke PixelIndexAt, drawX, drawY
-          ;invoke PlotBitmap, drawX, drawY, eax
+          invoke PixelIndexAt, srcX, srcY
+          invoke PlotBitmap, drawX, drawY, eax
 
           jmp for_y_eval
       break_for_y:
@@ -298,8 +304,6 @@ RotateBlit PROC lpBmp:PTR EECS205BITMAP, xcenter:DWORD, ycenter:DWORD, angle:FXP
       inc ebx
       jmp for_x_eval
   break_for_x:
-
-  ;; TODO
 
 	ret
 RotateBlit ENDP
