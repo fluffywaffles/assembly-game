@@ -198,6 +198,13 @@ CalcDrawCoord PROC centerpoint:DWORD, destpoint:DWORD, shift:DWORD
   ret
 CalcDrawCoord ENDP
 
+PixelIndexAt PROC x:DWORD, y:DWORD
+  mov eax, y
+  mul _dwWidth
+  add eax, x
+  ret ; pixel index = y * dwWidth + x
+PixelIndexAt ENDP
+
 RotateBlit PROC lpBmp:PTR EECS205BITMAP, xcenter:DWORD, ycenter:DWORD, angle:FXPT
   LOCAL cosa:FXPT, sina:FXPT
   LOCAL shiftX:DWORD, shiftY:DWORD
@@ -273,16 +280,16 @@ RotateBlit PROC lpBmp:PTR EECS205BITMAP, xcenter:DWORD, ycenter:DWORD, angle:FXP
           invoke CalcDrawCoord, ycenter, dstY, shiftY
           mov drawY, eax
 
-          ;invoke Within, drawX, 0, 639
-          ;cmp eax, 1
-          ;jne for_y_eval
+          invoke Within, drawX, 0, 639
+          cmp eax, 1
+          jne for_y_eval
 
-          ;invoke Within, drawY, 0, 479
-          ;cmp eax, 1
-          ;jne for_y_eval
+          invoke Within, drawY, 0, 479
+          cmp eax, 1
+          jne for_y_eval
 
           ;;; now draw the pixel
-          ;invoke PixelIndexAt, drawX, drawY
+          invoke PixelIndexAt, drawX, drawY
           ;invoke PlotBitmap, drawX, drawY, eax
 
           jmp for_y_eval
