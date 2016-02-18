@@ -191,6 +191,13 @@ Within PROC USES esi centerpoint:DWORD, lbound:DWORD, hbound:DWORD
     ret
 Within ENDP
 
+CalcDrawCoord PROC centerpoint:DWORD, destpoint:DWORD, shift:DWORD
+  mov eax, centerpoint
+  add eax, destpoint
+  sub eax, shift
+  ret
+CalcDrawCoord ENDP
+
 RotateBlit PROC lpBmp:PTR EECS205BITMAP, xcenter:DWORD, ycenter:DWORD, angle:FXPT
   LOCAL cosa:FXPT, sina:FXPT
   LOCAL shiftX:DWORD, shiftY:DWORD
@@ -261,10 +268,10 @@ RotateBlit PROC lpBmp:PTR EECS205BITMAP, xcenter:DWORD, ycenter:DWORD, angle:FXP
           cmp eax, 1
           jne for_y_eval
 
-          ;invoke CalcDrawCoord, xcenter, dstX, shiftX
-          ;mov drawX, eax
-          ;invoke CalcDrawCoord, ycenter, dstY, shiftY
-          ;mov drawY, eax
+          invoke CalcDrawCoord, xcenter, dstX, shiftX
+          mov drawX, eax
+          invoke CalcDrawCoord, ycenter, dstY, shiftY
+          mov drawY, eax
 
           ;invoke Within, drawX, 0, 639
           ;cmp eax, 1
