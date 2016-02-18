@@ -14,7 +14,13 @@ include stars.inc
 include lines.inc
 include blit.inc
 
+;; import stuff from lines.asm
 PLOT PROTO :DWORD, :DWORD, :DWORD
+
+EXTERNDEF SCREEN_X_MIN:DWORD
+EXTERNDEF SCREEN_X_MAX:DWORD
+EXTERNDEF SCREEN_Y_MIN:DWORD
+EXTERNDEF SCREEN_Y_MAX:DWORD
 
 .DATA
 
