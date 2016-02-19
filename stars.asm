@@ -55,7 +55,7 @@ DrawStarField endp
 AXP	proc a:FXPT, x:FXPT, p:FXPT
 
   mov eax, a   ; eax <- a
-  mul x        ; { edx, eax } <- eax * x, keep bottom bits (trunc)
+  imul x       ; { edx, eax } <- eax * x, keep bottom bits (trunc)
                ;; edx = non-fractional component
                ;; eax = fractional component
   shr eax, 16  ; trunc. frac
