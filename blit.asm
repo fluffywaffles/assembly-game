@@ -16,6 +16,7 @@ include blit.inc
 
 ;; import stuff from lines.asm
 PLOT PROTO :DWORD, :DWORD, :DWORD
+Abs PROTO :DWORD
 
 EXTERNDEF SCREEN_X_MIN:DWORD
 EXTERNDEF SCREEN_X_MAX:DWORD
