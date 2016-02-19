@@ -75,9 +75,8 @@ PlotBitmap PROC USES eax esi x:DWORD, y:DWORD, index:DWORD
   mov al, BYTE PTR [esi] ; color at index
   cmp al, _bTransparent  ; check if transparent
   je  skip_plot          ; don't plot if transparent
-  ;invoke PLOT, x, y, eax
+  invoke PLOT, x, y, eax
   skip_plot:
-    invoke PLOT, x, y, 03h
     ret
 PlotBitmap ENDP
 
@@ -133,15 +132,19 @@ fxpt2int PROC num:FXPT
   ret
 fxpt2int ENDP
 
-HalfComp PROC USES ebx edx comp:FXPT, dim:DWORD
-  mov ebx, comp
-  sar ebx, 1 ; comp / 2
+FXPTMultiply PROC USES edx a:FXPT, b:FXPT
+  mov eax, a
+  imul b       ; { edx, eax } <- a * b
+  shl edx, 16  ; truncate int
+  shr eax, 16  ; truncate frac
+  or  eax, edx ; combine
+  ret
+FXPTMultiply ENDP
 
-  invoke int2fxpt, dim
-  imul ebx
-
-  mov eax, edx ;; AHHH this is always 0
-  ; derp
+HalfComp PROC USES ebx comp:FXPT, dim:DWORD
+  invoke int2fxpt, dim ; convert dim to fixedpoint
+  mov ebx, dim
+  invoke FXPTMultiply, comp, ebx
   ret
 HalfComp ENDP
 
@@ -151,25 +154,21 @@ CalcSrcDims PROC USES ebx dstX:DWORD, dstY:DWORD, cosa:FXPT, sina:FXPT
   invoke int2fxpt, dstX
   mov ebx, eax
 
-  mov eax, ebx
-  imul cosa
-  mov srcX, edx ; srcX = dstX*cosa
+  invoke FXPTMultiply, ebx, cosa
+  mov srcX, eax ; srcX = dstX*cosa
 
-  mov eax, ebx
-  imul sina
-  neg edx
-  mov srcY, edx ; srcY = -dstX*sina
+  invoke FXPTMultiply, ebx, sina
+  neg eax
+  mov srcY, eax ; srcY = -dstX*sina
 
   invoke int2fxpt, dstY
   mov ebx, eax
 
-  mov eax, ebx
-  imul sina
-  add srcX, edx ; srcX = dstX*cosa + dstY*sina
+  invoke FXPTMultiply, ebx, sina
+  add srcX, eax ; srcX = dstX*cosa + dstY*sina
 
-  mov eax, dstY
-  imul cosa
-  add srcY, edx ; srcY = -dstX*sina + dstY*cosa
+  invoke FXPTMultiply, ebx, cosa
+  add srcY, eax ; srcY = -dstX*sina + dstY*cosa
 
   invoke fxpt2int, srcY
   mov edx, eax          ; edx = int(srcY)
@@ -209,7 +208,7 @@ PixelIndexAt ENDP
 
 RotateBlit PROC lpBmp:PTR EECS205BITMAP, xcenter:DWORD, ycenter:DWORD, angle:FXPT
   LOCAL cosa:FXPT, sina:FXPT
-  LOCAL shiftX:DWORD, shiftY:DWORD
+  LOCAL shiftX:FXPT, shiftY:FXPT
   LOCAL dstWidth:DWORD, dstHeight:DWORD
   LOCAL srcX:DWORD, srcY:DWORD, drawX:DWORD, drawY:DWORD
 
@@ -258,7 +257,7 @@ RotateBlit PROC lpBmp:PTR EECS205BITMAP, xcenter:DWORD, ycenter:DWORD, angle:FXP
       for_y:
         mov ecx, dstHeight
         neg ecx
-        sub ecx, 1
+        dec ecx
         for_y_eval:
           cmp ecx, dstHeight
           jge break_for_y
