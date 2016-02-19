@@ -145,13 +145,14 @@ FixedMultiply ENDP
 HalfComp PROC USES ebx comp:FXPT, dim:DWORD
   invoke int2fxpt, dim ; convert dim to fixedpoint
   mov ebx, eax
-  invoke FixedMultiply, comp, ebx ; comp * dim
+  mov eax, comp
   sar eax, 1 ; divide by 2
+  invoke FixedMultiply, eax, ebx ; comp * dim
   ret
 HalfComp ENDP
 
 CalcSrcDims PROC USES ebx dstX:DWORD, dstY:DWORD, cosa:FXPT, sina:FXPT
-  LOCAL srcX:DWORD, srcY:DWORD
+  LOCAL srcX:FXPT, srcY:FXPT
 
   invoke int2fxpt, dstX
   mov ebx, eax
