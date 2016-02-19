@@ -132,19 +132,19 @@ fxpt2int PROC num:FXPT
   ret
 fxpt2int ENDP
 
-FXPTMultiply PROC USES edx a:FXPT, b:FXPT
+FixedMultiply PROC USES edx a:FXPT, b:FXPT
   mov eax, a
   imul b       ; { edx, eax } <- a * b
   shl edx, 16  ; truncate int
   shr eax, 16  ; truncate frac
   or  eax, edx ; combine
   ret
-FXPTMultiply ENDP
+FixedMultiply ENDP
 
 HalfComp PROC USES ebx comp:FXPT, dim:DWORD
   invoke int2fxpt, dim ; convert dim to fixedpoint
   mov ebx, dim
-  invoke FXPTMultiply, comp, ebx
+  invoke FixedMultiply, comp, ebx
   ret
 HalfComp ENDP
 
@@ -154,20 +154,20 @@ CalcSrcDims PROC USES ebx dstX:DWORD, dstY:DWORD, cosa:FXPT, sina:FXPT
   invoke int2fxpt, dstX
   mov ebx, eax
 
-  invoke FXPTMultiply, ebx, cosa
+  invoke FixedMultiply, ebx, cosa
   mov srcX, eax ; srcX = dstX*cosa
 
-  invoke FXPTMultiply, ebx, sina
+  invoke FixedMultiply, ebx, sina
   neg eax
   mov srcY, eax ; srcY = -dstX*sina
 
   invoke int2fxpt, dstY
   mov ebx, eax
 
-  invoke FXPTMultiply, ebx, sina
+  invoke FixedMultiply, ebx, sina
   add srcX, eax ; srcX = dstX*cosa + dstY*sina
 
-  invoke FXPTMultiply, ebx, cosa
+  invoke FixedMultiply, ebx, cosa
   add srcY, eax ; srcY = -dstX*sina + dstY*cosa
 
   invoke fxpt2int, srcY
