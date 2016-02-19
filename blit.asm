@@ -215,6 +215,14 @@ RotateBlit PROC lpBmp:PTR EECS205BITMAP, xcenter:DWORD, ycenter:DWORD, angle:FXP
   LOCAL dstWidth:DWORD, dstHeight:DWORD
   LOCAL srcX:DWORD, srcY:DWORD, drawX:DWORD, drawY:DWORD
 
+  cmp angle, 0
+  jne continue
+
+  invoke BasicBlit, lpBmp, xcenter, ycenter
+  ret
+
+  continue:
+
   ; Unpack bitmap
   ;---------------------------------------
   invoke UnpackBitmap, lpBmp
