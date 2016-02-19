@@ -31,6 +31,12 @@ EXTERNDEF SCREEN_Y_MAX:DWORD
   _bTransparent BYTE  ?
   _lpBytes      DWORD ?
 
+  ;; for to unpack rect
+  _rl DWORD ?
+  _rt DWORD ?
+  _rr DWORD ?
+  _rb DWORD ?
+
 .CODE
 
 UnpackBitmap PROC USES eax esi bmpPtr:PTR EECS205BITMAP
@@ -322,9 +328,87 @@ RotateBlit PROC lpBmp:PTR EECS205BITMAP, xcenter:DWORD, ycenter:DWORD, angle:FXP
 	ret
 RotateBlit ENDP
 
-CheckIntersectRect PROC one:PTR EECS205RECT, two:PTR EECS205RECT
+AbsDistance PROC a:DWORD, b:DWORD
+  mov eax, b
+  sub eax, a
+  invoke Abs, eax
+  ret
+AbsDistance ENDP
 
-	ret
+UnpackRect PROC USES esi r:PTR EECS205RECT
+  mov esi, r
+
+  mov eax, [esi]
+  mov _rl, eax
+
+  mov eax, [esi + 4]
+  mov _rt, eax
+
+  mov eax, [esi + 8]
+  mov _rr, eax
+
+  mov eax, [esi + 12]
+  mov _rb, eax
+
+  invoke AbsDistance, _rt, _rb
+  mov edx, eax
+  invoke AbsDistance, _rr, _rl
+  ret
+UnpackRect ENDP
+
+CheckIntersectRect PROC USES ebx ecx one:PTR EECS205RECT, two:PTR EECS205RECT
+  LOCAL lone:DWORD, tone:DWORD, rone:DWORD, bone:DWORD
+  LOCAL width1:DWORD, width2:DWORD, height1:DWORD, height2:DWORD
+  LOCAL totalw:DWORD, totalh:DWORD
+
+  invoke UnpackRect, one
+
+  mov width1, eax
+  mov height1, edx
+
+  mov eax, _rl
+  mov lone, eax
+  mov eax, _rt
+  mov tone, eax
+  mov eax, _rr
+  mov rone, eax
+  mov eax, _rb
+  mov bone, eax
+
+  invoke UnpackRect, two
+  mov width2, eax
+  mov height2, edx
+
+  mov eax, width1
+  add eax, width2
+  mov totalw, eax
+
+  mov eax, height1
+  add eax, height2
+  mov totalh, eax
+
+  invoke AbsDistance, _rl, lone
+  mov ebx, eax
+  invoke AbsDistance, _rr, rone
+  add ebx, eax
+
+  invoke AbsDistance, _rb, bone
+  mov ecx, eax
+  invoke AbsDistance, _rt, tone
+  add ecx, eax
+
+  xor eax, eax
+
+  cmp ebx, totalw
+  jg  no_hit
+
+  cmp ecx, totalh
+  jg  no_hit
+
+  inc eax
+
+  no_hit:
+  	ret
 CheckIntersectRect ENDP
 
 END
