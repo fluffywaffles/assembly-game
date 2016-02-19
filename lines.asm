@@ -25,9 +25,6 @@ PI =  205887	                  ;;  PI
 TWO_PI	= 411774                ;;  2 * PI
 PI_INC_RECIP =  5340353        	;;  256 / PI
 
-;; don't fall off... 0b10
-NEG_CHK BYTE 2h
-
 SCREEN_X_MIN = 0
 SCREEN_X_MAX = 640
 SCREEN_Y_MIN = 0
@@ -54,10 +51,10 @@ fixed_j DWORD ?
 
 .CODE
 
-SintabIndex PROC USES edx angle:FXPT
+SintabIndex PROC USES ecx edx angle:FXPT
   mov  eax, angle
-  mov  edx, PI_INC_RECIP
-  imul edx
+  mov  ecx, PI_INC_RECIP
+  imul ecx
   mov  eax, edx
   ret
 SintabIndex ENDP
@@ -96,7 +93,7 @@ ReduceAngle PROC USES ebx ecx angle:FXPT
     jmp ifCanReducePi
   clamp:
     cmp eax, PI_HALF
-    jl  finish
+    jle finish
     ; PI - eax
     mov ecx, PI
     sub ecx, eax
@@ -120,7 +117,7 @@ FixedSin PROC USES ebx esi angle:FXPT
 
   ; seriously trust me: the sign tells all
   cmp sign_flip, 0
-  jne finish
+  je  finish
 
   neg eax ; sometimes you just flip your shit
 
@@ -128,11 +125,11 @@ FixedSin PROC USES ebx esi angle:FXPT
     ret
 FixedSin ENDP
 
-FixedCos PROC USES ebx angle:FXPT
+FixedCos PROC angle:FXPT
   ; nbd just use sine
-  mov ebx, angle
-  add ebx, PI_HALF
-  invoke FixedSin, ebx
+  mov eax, angle
+  add eax, PI_HALF
+  invoke FixedSin, eax
 	ret
 FixedCos ENDP
 
