@@ -273,8 +273,6 @@ RotateBlit PROC lpBmp:PTR EECS205BITMAP, xcenter:DWORD, ycenter:DWORD, angle:FXP
           mov srcX, eax
           mov srcY, edx
 
-          invoke PLOT, 10, ecx, 01ch
-
           invoke Within, srcX, 0, _dwWidth
           cmp eax, 1
           jne for_y_eval
