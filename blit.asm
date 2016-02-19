@@ -143,8 +143,9 @@ FixedMultiply ENDP
 
 HalfComp PROC USES ebx comp:FXPT, dim:DWORD
   invoke int2fxpt, dim ; convert dim to fixedpoint
-  mov ebx, dim
-  invoke FixedMultiply, comp, ebx
+  mov ebx, eax
+  invoke FixedMultiply, comp, ebx ; comp * dim
+  sar eax, 1 ; divide by 2
   ret
 HalfComp ENDP
 
@@ -230,11 +231,15 @@ RotateBlit PROC lpBmp:PTR EECS205BITMAP, xcenter:DWORD, ycenter:DWORD, angle:FXP
   mov shiftX, eax
   invoke HalfComp, sina, _dwHeight
   sub shiftX, eax
+  invoke fxpt2int, shiftX
+  mov shiftX, eax
 
   invoke HalfComp, cosa, _dwHeight
   mov shiftY, eax
   invoke HalfComp, sina, _dwWidth
   add shiftY, eax
+  invoke fxpt2int, shiftY
+  mov shiftY, eax
 
   ; Calculate destination width and height
   ;---------------------------------------
