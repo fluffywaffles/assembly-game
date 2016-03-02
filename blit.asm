@@ -23,6 +23,11 @@ EXTERNDEF SCREEN_X_MAX:DWORD
 EXTERNDEF SCREEN_Y_MIN:DWORD
 EXTERNDEF SCREEN_Y_MAX:DWORD
 
+PUBLIC DEBUG
+PUBLIC EdgesFromCenter
+PUBLIC _dwWidth
+PUBLIC _dwHeight
+
 .DATA
 
   ;; for to unpack bitmap
@@ -36,6 +41,8 @@ EXTERNDEF SCREEN_Y_MAX:DWORD
   _rt DWORD ?
   _rr DWORD ?
   _rb DWORD ?
+
+  DEBUG = 0
 
 .CODE
 
@@ -67,7 +74,13 @@ EdgesFromCenter PROC USES ebx centerpoint:DWORD, len:DWORD
   sub eax, ebx ; start - len/2
   add edx, ebx ; start + len/2
 
-  ret
+  mov ebx, len
+  test ebx, 1
+  jz finish
+  inc edx
+
+  finish:
+    ret
 EdgesFromCenter ENDP
 
 BitmapSize PROC USES edx
@@ -120,7 +133,7 @@ BasicBlit PROC USES eax ebx ecx edx ptrBitmap:PTR EECS205BITMAP, xcenter:DWORD, 
 
     inc ebx         ; y++
     cmp ecx, bpsize ; if index == size then
-    je  break       ; break
+    jge break       ; break
     jmp inf
 
   break:
@@ -306,13 +319,17 @@ RotateBlit PROC lpBmp:PTR EECS205BITMAP, xcenter:DWORD, ycenter:DWORD, angle:FXP
           cmp eax, 1
           jne for_y_eval
 
+          IFE DEBUG
           invoke PLOT, drawX, 15, 0c0h
+          ENDIF
 
           invoke Within, drawY, 0, 479
           cmp eax, 1
           jne for_y_eval
 
+          IFE DEBUG
           invoke PLOT, 15, drawY, 0c0h
+          ENDIF
 
           ;;; now draw the pixel
           invoke PixelIndexAt, srcX, srcY

@@ -17,6 +17,7 @@ PUBLIC SCREEN_X_MIN
 PUBLIC SCREEN_X_MAX
 PUBLIC SCREEN_Y_MIN
 PUBLIC SCREEN_Y_MAX
+PUBLIC PI_INC_RECIP
 
 .DATA
 ;;  These are some useful constants (fixed point values that correspond to important angles)
