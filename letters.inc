@@ -7,7 +7,6 @@ Letter typedef _Letter
 
 DrawLetter PROTO :PTR Letter, x:DWORD, y:DWORD, color:DWORD
 DrawWord PROTO wPtr:PTR DWORD, len:DWORD, x:DWORD, y:DWORD, color:DWORD
-DebugLetters PROTO
 
 EXTERNDEF l3a :DWORD
 EXTERNDEF l3b :DWORD
