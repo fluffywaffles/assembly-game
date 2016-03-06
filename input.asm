@@ -122,15 +122,15 @@ UnpackKeyPress PROC USES eax ebx
   IFDEF DEBUG
 
   .if k_space
-    invoke PLOT, 10, 20, 01ch
+    invoke PLOT, 10, 22, 01ch
   .else
-    invoke PLOT, 10, 20, 0c0h
+    invoke PLOT, 10, 22, 0c0h
   .endif
 
   .if k_p
-    invoke PLOT, 10, 18, 01ch
+    invoke PLOT, 10, 20, 01ch
   .else
-    invoke PLOT, 10, 18, 0c0h
+    invoke PLOT, 10, 20, 0c0h
   .endif
 
   .if k_up

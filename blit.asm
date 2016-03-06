@@ -74,19 +74,20 @@ BitmapSize PROC USES edx
   ret ; trunc
 BitmapSize ENDP
 
-PlotBitmap PROC USES eax esi x:DWORD, y:DWORD, index:DWORD, opacity:DWORD
+PlotBitmap PROC USES eax esi x:DWORD, y:DWORD, index:DWORD, colorMask:DWORD, colorShift:DWORD
   mov esi, _lpBytes ; bitmap ptr
   add esi, index    ; current pixel
   mov al, BYTE PTR [esi] ; color at index
   cmp al, _bTransparent  ; check if transparent
   je  skip_plot          ; don't plot if transparent
-  and eax, opacity
+  add eax, colorShift
+  and eax, colorMask
   invoke PLOT, x, y, eax
   skip_plot:
     ret
 PlotBitmap ENDP
 
-BasicBlit PROC USES eax ebx ecx edx ptrBitmap:PTR EECS205BITMAP, xcenter:DWORD, ycenter:DWORD
+BasicBlit PROC USES eax ebx ecx edx ptrBitmap:PTR EECS205BITMAP, xcenter:DWORD, ycenter:DWORD, colorMask:DWORD, colorShift:DWORD
   LOCAL startX:DWORD, endX:DWORD, startY:DWORD, bpsize:DWORD
 
   invoke UnpackBitmap, ptrBitmap
@@ -111,7 +112,7 @@ BasicBlit PROC USES eax ebx ecx edx ptrBitmap:PTR EECS205BITMAP, xcenter:DWORD, 
         cmp eax, endX ; if x >= endX
         jge exit_for_loop
       body:
-        invoke PlotBitmap, eax, ebx, ecx, 0 ; x, y, bitmap index offset
+        invoke PlotBitmap, eax, ebx, ecx, colorMask, colorShift ; x, y, bitmap index offset
         inc eax ; x++
         inc ecx ; bitmap index ++
         jmp eval
@@ -214,18 +215,18 @@ PixelIndexAt PROC x:DWORD, y:DWORD
   ret ; pixel index = y * dwWidth + x
 PixelIndexAt ENDP
 
-RotateBlit PROC lpBmp:PTR EECS205BITMAP, xcenter:DWORD, ycenter:DWORD, angle:FXPT, opacity:DWORD
+RotateBlit PROC lpBmp:PTR EECS205BITMAP, xcenter:DWORD, ycenter:DWORD, angle:FXPT, colorMask:DWORD, colorShift:DWORD
   LOCAL cosa:FXPT, sina:FXPT
   LOCAL shiftX:FXPT, shiftY:FXPT
   LOCAL dstWidth:DWORD, dstHeight:DWORD
   LOCAL srcX:DWORD, srcY:DWORD, drawX:DWORD, drawY:DWORD
-  LOCAL opacityMod:DWORD
+  LOCAL colorMod:DWORD
 
-  ;cmp angle, 0
-  ;jne continue
+  cmp angle, 0
+  jne continue
 
-  ;invoke BasicBlit, lpBmp, xcenter, ycenter
-  ;ret
+  invoke BasicBlit, lpBmp, xcenter, ycenter, colorMask, colorShift
+  ret
 
   continue:
 
@@ -320,7 +321,7 @@ RotateBlit PROC lpBmp:PTR EECS205BITMAP, xcenter:DWORD, ycenter:DWORD, angle:FXP
 
           ;;; now draw the pixel
           invoke PixelIndexAt, srcX, srcY
-          invoke PlotBitmap, drawX, drawY, eax, opacity
+          invoke PlotBitmap, drawX, drawY, eax, colorMask, colorShift
 
           jmp for_y_eval
       break_for_y:

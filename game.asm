@@ -17,6 +17,8 @@ include game.inc
 include input.inc
 include keys.inc
 
+include letters.inc
+
 .DATA
 
 ;; Sprites
@@ -42,8 +44,8 @@ pause BYTE 0
 next_pause FXPT 0
 
 ;; Timing Data
-delta_t DWORD 2000h ; AKA 1/16
-total_t DWORD 0
+delta_t FXPT 2000h ; AKA 1/16
+total_t FXPT 0
 
 ;; Player data
 PLAYER_X DWORD 100
@@ -58,10 +60,10 @@ CURRENT_PLAYER_SPRITE DWORD ? ; PTR EECS205BITMAP
 PLAYER_COLLIDER EECS205RECT <?, ?, ?, ?>
 
 ;; Animations
-NukeAnimation Animation { 0, 3, SIZEOF EECS205BITMAP, OFFSET nuke_000 }
-FighterAnimation Animation { 0, 3, SIZEOF EECS205BITMAP, OFFSET fighter_000 }
+NukeAnimation Animation { 0, 3, SIZEOF EECS205BITMAP,, OFFSET nuke_000 }
+FighterAnimation Animation { 0, 3, SIZEOF EECS205BITMAP,, OFFSET fighter_000 }
 
-Fighter Character { , 2, , OFFSET fighter_001 }
+Fighter Character { , , , , , 2, }
 
 ;; other
 asteroid_rotation FXPT 0
@@ -69,6 +71,26 @@ asteroid_collider EECS205RECT <?, ?, ?, ?>
 space_down BYTE 0
 
 rot_offset FXPT 0c900h ; approximately pi/2 to maximum possible accuracy
+
+wCollide DWORD l7c, l7o, l7l,
+               l7l, l7i, l7d,
+               l7e, l7exclamation
+
+IFDEF DEBUG
+
+l3alpha DWORD l3a, l3b, l3c, l3d, l3e, l3f, l3g, l3h, l3i, l3j, l3k, l3l, l3m,
+              l3n, l3o, l3p, l3q, l3r, l3s, l3t, l3u, l3v, l3w, l3x, l3y, l3z,
+              l3exclamation
+
+l5alpha DWORD l5a, l5b, l5c, l5d, l5e, l5f, l5g, l5h, l5i, l5j, l5k, l5l, l5m,
+              l5n, l5o, l5p, l5q, l5r, l5s, l5t, l5u, l5v, l5w, l5x, l5y, l5z,
+              l5exclamation
+
+l7alpha DWORD l7a, l7b, l7c, l7d, l7e, l7f, l7g, l7h, l7i, l7j, l7k, l7l, l7m,
+              l7n, l7o, l7p, l7q, l7r, l7s, l7t, l7u, l7v, l7w, l7x, l7y, l7z,
+              l7exclamation
+
+ENDIF
 
 opacities BYTE 4 DUP(0ffh), 4 DUP(0dah), 4 DUP(09h), 4 DUP(0)
 
@@ -239,7 +261,7 @@ DrawPlayer PROC USES eax
       mov CURRENT_PLAYER_SPRITE, OFFSET fighter_000
 
   finish:
-    invoke RotateBlit, CURRENT_PLAYER_SPRITE, PLAYER_X, PLAYER_Y, PLAYER_ANGLE, (Character PTR Fighter).opacity
+    invoke RotateBlit, CURRENT_PLAYER_SPRITE, PLAYER_X, PLAYER_Y, PLAYER_ANGLE, (Character PTR Fighter).opacity, 0
     ret
 DrawPlayer ENDP
 
@@ -247,51 +269,12 @@ DrawAsteroid PROC USES ebx
   mov ebx, asteroid_rotation
   add ebx, delta_t
   mov asteroid_rotation, ebx
-  invoke RotateBlit, OFFSET asteroid_000, 319, 239, ebx, 255
+  invoke RotateBlit, OFFSET asteroid_000, 319, 239, ebx, 255, 0
   ret
 DrawAsteroid ENDP
 
 DrawCollideWarning PROC
-  invoke PLOT, 281, 200, 0c0h ;; c
-  invoke PLOT, 280, 201, 0c0h
-  invoke PLOT, 281, 202, 0c0h
-  invoke PLOT, 284, 201, 0c0h ;; o
-  invoke PLOT, 285, 200, 0c0h
-  invoke PLOT, 285, 202, 0c0h
-  invoke PLOT, 286, 201, 0c0h
-  invoke PLOT, 288, 200, 0c0h ;; l
-  invoke PLOT, 288, 201, 0c0h
-  invoke PLOT, 288, 202, 0c0h
-  invoke PLOT, 289, 202, 0c0h
-  invoke PLOT, 290, 202, 0c0h
-  invoke PLOT, 292, 200, 0c0h ;; l
-  invoke PLOT, 292, 201, 0c0h
-  invoke PLOT, 292, 202, 0c0h
-  invoke PLOT, 293, 202, 0c0h
-  invoke PLOT, 294, 202, 0c0h
-  invoke PLOT, 296, 200, 0c0h ;; i
-  invoke PLOT, 296, 202, 0c0h
-  invoke PLOT, 297, 200, 0c0h
-  invoke PLOT, 297, 201, 0c0h
-  invoke PLOT, 297, 202, 0c0h
-  invoke PLOT, 298, 200, 0c0h
-  invoke PLOT, 298, 202, 0c0h
-  invoke PLOT, 300, 200, 0c0h ;; d
-  invoke PLOT, 300, 201, 0c0h
-  invoke PLOT, 300, 202, 0c0h
-  invoke PLOT, 301, 200, 0c0h
-  invoke PLOT, 301, 202, 0c0h
-  invoke PLOT, 302, 201, 0c0h
-  invoke PLOT, 304, 201, 0c0h ;; e
-  invoke PLOT, 305, 200, 0c0h
-  invoke PLOT, 305, 201, 0c0h
-  invoke PLOT, 305, 202, 0c0h
-  invoke PLOT, 306, 200, 0c0h
-  invoke PLOT, 306, 202, 0c0h
-  invoke PLOT, 309, 200, 0c0h ;; !
-  invoke PLOT, 309, 201, 0c0h
-  invoke PLOT, 309, 203, 0c0h
-  ret
+  invoke DrawWord, OFFSET wCollide, LENGTHOF wCollide, 280, 200, 0c0h
 DrawCollideWarning ENDP
 
 TogglePause PROC USES eax
@@ -324,6 +307,12 @@ GamePlay PROC USES eax ebx
 
   invoke UnpackMouse
   invoke UnpackKeyPress
+
+  IFDEF DEBUG
+  invoke DrawWord, OFFSET l7alpha, LENGTHOF l7alpha, 10, 420, 0c3h
+  invoke DrawWord, OFFSET l5alpha, LENGTHOF l5alpha, 10, 430, 0c3h
+  invoke DrawWord, OFFSET l3alpha, LENGTHOF l3alpha, 10, 438, 0c3h
+  ENDIF
 
   mov eax, (Character PTR Fighter).fade
   mov ebx, (Character PTR Fighter).fademod

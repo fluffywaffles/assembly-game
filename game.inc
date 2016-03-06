@@ -53,16 +53,52 @@ SCREEN_SIZE = SCREEN_WIDTH * SCREEN_HEIGHT
 
 ;; My structs idk
 
+Character STRUCT
+  rotation FXPT ?
+  pos_x    FXPT ?
+  pos_y    FXPT ?
+  collider_ptr DWORD ?
+  ;; to be deleted
+  fade     DWORD 0
+  fademod  DWORD 2
+  opacity  DWORD 0ffh
+Character ENDS
+
 Animation STRUCT
-  current_frame DWORD ?
-  frame_count DWORD ?
-  frame_size DWORD ?
-  frame_ptr DWORD ?
+  current_frame BYTE ?
+  frame_count   BYTE ?
+  frame_size    BYTE ?
+                BYTE ? ;; padding
+  frame_ptr     DWORD ?
 Animation ENDS
 
-Character STRUCT
-  fade    DWORD 0
-  fademod DWORD 1
-  opacity DWORD 0ffh
-  bitmap  DWORD ? ; PTR EECS205BITMAP
-Character ENDS
+Shader STRUCT
+  ; Shader repeat behaviours: 1 - no repeat, 2 - reverse, o/w - wrap (value = initial value)
+  ; compare index with LENGTHOF (mask array) to determine when to repeat
+  cm_index   BYTE ? ; current mask index
+  cm_delta   BYTE ? ; mask index change speed
+  cm_repeat  BYTE ? ; mask repeat behaviour
+  colorMask  BYTE ? ; current mask value
+  ; compare colorShift against cs_bound to determine when to repeat
+  cs_bound   BYTE ? ; shift boundary (at which to stop/repeat)
+  cs_delta   BYTE ? ; shift change per frame
+  cs_repeat  BYTE ? ; shift repeat behaviour
+  colorShift BYTE ? ; current color shift
+Shader ENDS
+
+;;; Interesting Shaders
+;Rainbow          Shader {  ?,  ?, ?,    ?, 0, -025h, 0, 0ffh }
+;;; opacities is the mask array for fades (3 possible speeds: 1 slow, 2, 4 fast)
+;opacities BYTE 4 DUP(0ffh), 4 DUP(0dah), 4 DUP(09h), 4 DUP(0)
+;FadeInOut        Shader {  0,  2, 2, 0ffh, ?,     ?, ?,    ? }
+;FadeOut          Shader {  0,  2, 1, 0ffh, ?,     ?, ?,    ? }
+;FadeIn           Shader { 15, -2, 1,   0h, ?,     ?, ?,    ? }
+;FadeInOutRainbow Shader {  0,  2, 2, 0ffh, 0, -025h, 0, 0ffh }
+
+AnimatedCharacter STRUCT
+  rotation FXPT ?
+  pos_x    FXPT ?
+  pos_y    FXPT ?
+  anim     Animation <>
+  shader   Shader <>
+AnimatedCharacter ENDS
