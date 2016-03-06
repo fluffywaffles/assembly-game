@@ -1,0 +1,491 @@
+l3a Letter < 3, offset l3a + sizeof l3a >
+    BYTE 0ffh, 0h, 0ffh
+    BYTE 0h, 0h, 0h
+    BYTE 0h, 0ffh, 0h
+l3b Letter < 3, offset l3b + sizeof l3b >
+    BYTE 0h, 0h, 0ffh
+    BYTE 0h, 0h, 0h
+    BYTE 0h, 0h, 0h
+l3c Letter < 3, offset l3c + sizeof l3c >
+    BYTE 0ffh, 0h, 0h
+    BYTE 0h, 0ffh, 0ffh
+    BYTE 0ffh, 0h, 0h
+l3d Letter < 3, offset l3d + sizeof l3d >
+    BYTE 0h, 0h, 0ffh
+    BYTE 0h, 0ffh, 0h
+    BYTE 0h, 0h, 0ffh
+l3e Letter < 3, offset l3e + sizeof l3e >
+    BYTE 0ffh, 0h, 0h
+    BYTE 0h, 0h, 0ffh
+    BYTE 0ffh, 0h, 0h
+l3f Letter < 3, offset l3f + sizeof l3f >
+    BYTE 0h, 0h, 0h
+    BYTE 0h, 0h, 0ffh
+    BYTE 0h, 0ffh, 0ffh
+l3g Letter < 3, offset l3g + sizeof l3g >
+    BYTE 0h, 0h, 0ffh
+    BYTE 0h, 0ffh, 0h
+    BYTE 0h, 0h, 0h
+l3h Letter < 3, offset l3h + sizeof l3h >
+    BYTE 0h, 0ffh, 0h
+    BYTE 0h, 0h, 0h
+    BYTE 0h, 0ffh, 0h
+l3i Letter < 3, offset l3i + sizeof l3i >
+    BYTE 0h, 0h, 0h
+    BYTE 0ffh, 0h, 0ffh
+    BYTE 0h, 0h, 0h
+l3j Letter < 3, offset l3j + sizeof l3j >
+    BYTE 0h, 0h, 0h
+    BYTE 0ffh, 0h, 0ffh
+    BYTE 0h, 0h, 0ffh
+l3k Letter < 3, offset l3k + sizeof l3k >
+    BYTE 0h, 0ffh, 0h
+    BYTE 0h, 0h, 0ffh
+    BYTE 0h, 0ffh, 0h
+l3l Letter < 3, offset l3l + sizeof l3l >
+    BYTE 0h, 0ffh, 0ffh
+    BYTE 0h, 0ffh, 0ffh
+    BYTE 0h, 0h, 0h
+l3m Letter < 3, offset l3m + sizeof l3m >
+    BYTE 0h, 0h, 0h
+    BYTE 0h, 0h, 0h
+    BYTE 0h, 0ffh, 0h
+l3n Letter < 3, offset l3n + sizeof l3n >
+    BYTE 0h, 0h, 0h
+    BYTE 0h, 0ffh, 0h
+    BYTE 0h, 0ffh, 0h
+l3o Letter < 3, offset l3o + sizeof l3o >
+    BYTE 0h, 0h, 0h
+    BYTE 0h, 0ffh, 0h
+    BYTE 0h, 0h, 0h
+l3p Letter < 3, offset l3p + sizeof l3p >
+    BYTE 0h, 0h, 0h
+    BYTE 0h, 0h, 0h
+    BYTE 0h, 0ffh, 0ffh
+l3q Letter < 3, offset l3q + sizeof l3q >
+    BYTE 0h, 0h, 0h
+    BYTE 0h, 0ffh, 0h
+    BYTE 0h, 0h, 0ffh
+l3r Letter < 3, offset l3r + sizeof l3r >
+    BYTE 0h, 0h, 0h
+    BYTE 0h, 0ffh, 0ffh
+    BYTE 0h, 0ffh, 0ffh
+l3s Letter < 3, offset l3s + sizeof l3s >
+    BYTE 0ffh, 0h, 0h
+    BYTE 0ffh, 0h, 0ffh
+    BYTE 0h, 0h, 0ffh
+l3t Letter < 3, offset l3t + sizeof l3t >
+    BYTE 0h, 0h, 0h
+    BYTE 0ffh, 0h, 0ffh
+    BYTE 0ffh, 0h, 0ffh
+l3u Letter < 3, offset l3u + sizeof l3u >
+    BYTE 0h, 0ffh, 0h
+    BYTE 0h, 0ffh, 0h
+    BYTE 0h, 0h, 0h
+l3v Letter < 3, offset l3v + sizeof l3v >
+    BYTE 0h, 0ffh, 0h
+    BYTE 0h, 0ffh, 0h
+    BYTE 0ffh, 0h, 0ffh
+l3w Letter < 3, offset l3w + sizeof l3w >
+    BYTE 0h, 0ffh, 0h
+    BYTE 0h, 0h, 0h
+    BYTE 0h, 0h, 0h
+l3x Letter < 3, offset l3x + sizeof l3x >
+    BYTE 0h, 0ffh, 0h
+    BYTE 0ffh, 0h, 0ffh
+    BYTE 0h, 0ffh, 0h
+l3y Letter < 3, offset l3y + sizeof l3y >
+    BYTE 0h, 0ffh, 0h
+    BYTE 0ffh, 0h, 0ffh
+    BYTE 0ffh, 0h, 0ffh
+l3z Letter < 3, offset l3z + sizeof l3z >
+    BYTE 0h, 0h, 0ffh
+    BYTE 0ffh, 0h, 0ffh
+    BYTE 0ffh, 0h, 0h
+l3exclamation Letter < 4, offset l3exclamation + sizeof l3exclamation >
+    BYTE 0ffh, 0h, 0ffh, 0ffh
+    BYTE 0ffh, 0h, 0ffh, 0ffh
+    BYTE 0ffh, 0ffh, 0ffh, 0ffh
+    BYTE 0ffh, 0h, 0ffh, 0ffh
+
+l5a Letter < 5, offset l5a + sizeof l5a >
+    BYTE 0ffh, 0ffh, 0h, 0ffh, 0ffh
+    BYTE 0ffh, 0h, 0ffh, 0h, 0ffh
+    BYTE 0h, 0ffh, 0ffh, 0ffh, 0h
+    BYTE 0h, 0h, 0h, 0h, 0h
+    BYTE 0h, 0ffh, 0ffh, 0ffh, 0h
+l5b Letter < 5, offset l5b + sizeof l5b >
+    BYTE 0h, 0h, 0ffh, 0ffh, 0ffh
+    BYTE 0h, 0ffh, 0h, 0ffh, 0ffh
+    BYTE 0h, 0h, 0h, 0h, 0ffh
+    BYTE 0h, 0ffh, 0ffh, 0ffh, 0h
+    BYTE 0h, 0h, 0h, 0h, 0h
+l5c Letter < 5, offset l5c + sizeof l5c >
+    BYTE 0ffh, 0h, 0h, 0h, 0h
+    BYTE 0h, 0ffh, 0ffh, 0ffh, 0ffh
+    BYTE 0h, 0ffh, 0ffh, 0ffh, 0ffh
+    BYTE 0h, 0ffh, 0ffh, 0ffh, 0ffh
+    BYTE 0ffh, 0h, 0h, 0h, 0h
+l5d Letter < 5, offset l5d + sizeof l5d >
+    BYTE 0h, 0h, 0h, 0h, 0ffh
+    BYTE 0h, 0ffh, 0ffh, 0ffh, 0h
+    BYTE 0h, 0ffh, 0ffh, 0ffh, 0h
+    BYTE 0h, 0ffh, 0ffh, 0ffh, 0h
+    BYTE 0h, 0h, 0h, 0h, 0ffh
+l5e Letter < 5, offset l5e + sizeof l5e >
+    BYTE 0h, 0h, 0h, 0h, 0h
+    BYTE 0h, 0ffh, 0ffh, 0ffh, 0ffh
+    BYTE 0h, 0h, 0h, 0ffh, 0ffh
+    BYTE 0h, 0ffh, 0ffh, 0ffh, 0ffh
+    BYTE 0h, 0h, 0h, 0h, 0h
+l5f Letter < 5, offset l5f + sizeof l5f >
+    BYTE 0h, 0h, 0h, 0h, 0h
+    BYTE 0h, 0ffh, 0ffh, 0ffh, 0ffh
+    BYTE 0h, 0h, 0h, 0ffh, 0ffh
+    BYTE 0h, 0ffh, 0ffh, 0ffh, 0ffh
+    BYTE 0h, 0ffh, 0ffh, 0ffh, 0ffh
+l5g Letter < 5, offset l5g + sizeof l5g >
+    BYTE 0h, 0h, 0h, 0h, 0h
+    BYTE 0h, 0ffh, 0ffh, 0ffh, 0ffh
+    BYTE 0h, 0ffh, 0h, 0h, 0h
+    BYTE 0h, 0ffh, 0ffh, 0ffh, 0h
+    BYTE 0h, 0h, 0h, 0h, 0h
+l5h Letter < 5, offset l5h + sizeof l5h >
+    BYTE 0h, 0ffh, 0ffh, 0ffh, 0h
+    BYTE 0h, 0ffh, 0ffh, 0ffh, 0h
+    BYTE 0h, 0h, 0h, 0h, 0h
+    BYTE 0h, 0ffh, 0ffh, 0ffh, 0h
+    BYTE 0h, 0ffh, 0ffh, 0ffh, 0h
+l5i Letter < 5, offset l5i + sizeof l5i >
+    BYTE 0h, 0h, 0h, 0h, 0h
+    BYTE 0ffh, 0ffh, 0h, 0ffh, 0ffh
+    BYTE 0ffh, 0ffh, 0h, 0ffh, 0ffh
+    BYTE 0ffh, 0ffh, 0h, 0ffh, 0ffh
+    BYTE 0h, 0h, 0h, 0h, 0h
+l5j Letter < 5, offset l5j + sizeof l5j >
+    BYTE 0h, 0h, 0h, 0h, 0h
+    BYTE 0ffh, 0ffh, 0h, 0ffh, 0ffh
+    BYTE 0ffh, 0ffh, 0h, 0ffh, 0ffh
+    BYTE 0h, 0ffh, 0h, 0ffh, 0ffh
+    BYTE 0h, 0h, 0h, 0ffh, 0ffh
+l5k Letter < 5, offset l5k + sizeof l5k >
+    BYTE 0h, 0ffh, 0ffh, 0h, 0ffh
+    BYTE 0h, 0ffh, 0h, 0ffh, 0ffh
+    BYTE 0h, 0h, 0h, 0h, 0ffh
+    BYTE 0h, 0ffh, 0ffh, 0ffh, 0h
+    BYTE 0h, 0ffh, 0ffh, 0ffh, 0h
+l5l Letter < 5, offset l5l + sizeof l5l >
+    BYTE 0h, 0ffh, 0ffh, 0ffh, 0ffh
+    BYTE 0h, 0ffh, 0ffh, 0ffh, 0ffh
+    BYTE 0h, 0ffh, 0ffh, 0ffh, 0ffh
+    BYTE 0h, 0ffh, 0ffh, 0ffh, 0ffh
+    BYTE 0h, 0h, 0h, 0h, 0h
+l5m Letter < 5, offset l5m + sizeof l5m >
+    BYTE 0ffh, 0h, 0h, 0h, 0ffh
+    BYTE 0h, 0ffh, 0h, 0ffh, 0h
+    BYTE 0h, 0ffh, 0ffh, 0ffh, 0h
+    BYTE 0h, 0ffh, 0ffh, 0ffh, 0h
+    BYTE 0h, 0ffh, 0ffh, 0ffh, 0h
+l5n Letter < 5, offset l5n + sizeof l5n >
+    BYTE 0h, 0ffh, 0ffh, 0ffh, 0h
+    BYTE 0h, 0h, 0ffh, 0ffh, 0h
+    BYTE 0h, 0ffh, 0h, 0ffh, 0h
+    BYTE 0h, 0ffh, 0ffh, 0h, 0h
+    BYTE 0h, 0ffh, 0ffh, 0ffh, 0h
+l5o Letter < 5, offset l5o + sizeof l5o >
+    BYTE 0ffh, 0h, 0h, 0h, 0ffh
+    BYTE 0h, 0ffh, 0ffh, 0ffh, 0h
+    BYTE 0h, 0ffh, 0ffh, 0ffh, 0h
+    BYTE 0h, 0ffh, 0ffh, 0ffh, 0h
+    BYTE 0ffh, 0h, 0h, 0h, 0ffh
+l5p Letter < 5, offset l5p + sizeof l5p >
+    BYTE 0h, 0h, 0h, 0h, 0ffh
+    BYTE 0h, 0ffh, 0ffh, 0ffh, 0h
+    BYTE 0h, 0h, 0h, 0h, 0ffh
+    BYTE 0h, 0ffh, 0ffh, 0ffh, 0ffh
+    BYTE 0h, 0ffh, 0ffh, 0ffh, 0ffh
+l5q Letter < 5, offset l5q + sizeof l5q >
+    BYTE 0ffh, 0h, 0h, 0h, 0ffh
+    BYTE 0h, 0ffh, 0ffh, 0ffh, 0h
+    BYTE 0h, 0ffh, 0h, 0ffh, 0h
+    BYTE 0h, 0ffh, 0ffh, 0h, 0h
+    BYTE 0ffh, 0h, 0h, 0h, 0h
+l5r Letter < 5, offset l5r + sizeof l5r >
+    BYTE 0h, 0h, 0h, 0h, 0ffh
+    BYTE 0h, 0ffh, 0ffh, 0ffh, 0h
+    BYTE 0h, 0h, 0h, 0h, 0ffh
+    BYTE 0h, 0ffh, 0ffh, 0h, 0ffh
+    BYTE 0h, 0ffh, 0ffh, 0ffh, 0h
+l5s Letter < 5, offset l5s + sizeof l5s >
+    BYTE 0ffh, 0h, 0h, 0h, 0h
+    BYTE 0h, 0ffh, 0ffh, 0ffh, 0ffh
+    BYTE 0ffh, 0h, 0h, 0h, 0ffh
+    BYTE 0ffh, 0ffh, 0ffh, 0ffh, 0h
+    BYTE 0h, 0h, 0h, 0h, 0ffh
+l5t Letter < 5, offset l5t + sizeof l5t >
+    BYTE 0h, 0h, 0h, 0h, 0h
+    BYTE 0ffh, 0ffh, 0h, 0ffh, 0ffh
+    BYTE 0ffh, 0ffh, 0h, 0ffh, 0ffh
+    BYTE 0ffh, 0ffh, 0h, 0ffh, 0ffh
+    BYTE 0ffh, 0ffh, 0h, 0ffh, 0ffh
+l5u Letter < 5, offset l5u + sizeof l5u >
+    BYTE 0h, 0ffh, 0ffh, 0ffh, 0h
+    BYTE 0h, 0ffh, 0ffh, 0ffh, 0h
+    BYTE 0h, 0ffh, 0ffh, 0ffh, 0h
+    BYTE 0h, 0ffh, 0ffh, 0ffh, 0h
+    BYTE 0ffh, 0h, 0h, 0h, 0ffh
+l5v Letter < 5, offset l5v + sizeof l5v >
+    BYTE 0h, 0ffh, 0ffh, 0ffh, 0h
+    BYTE 0h, 0ffh, 0ffh, 0ffh, 0h
+    BYTE 0h, 0ffh, 0ffh, 0ffh, 0h
+    BYTE 0ffh, 0h, 0ffh, 0h, 0ffh
+    BYTE 0ffh, 0ffh, 0h, 0ffh, 0ffh
+l5w Letter < 5, offset l5w + sizeof l5w >
+    BYTE 0h, 0ffh, 0ffh, 0ffh, 0h
+    BYTE 0h, 0ffh, 0ffh, 0ffh, 0h
+    BYTE 0h, 0ffh, 0ffh, 0ffh, 0h
+    BYTE 0h, 0ffh, 0h, 0ffh, 0h
+    BYTE 0ffh, 0h, 0ffh, 0h, 0ffh
+l5x Letter < 5, offset l5x + sizeof l5x >
+    BYTE 0h, 0ffh, 0ffh, 0ffh, 0h
+    BYTE 0ffh, 0h, 0ffh, 0h, 0ffh
+    BYTE 0ffh, 0ffh, 0h, 0ffh, 0ffh
+    BYTE 0ffh, 0h, 0ffh, 0h, 0ffh
+    BYTE 0h, 0ffh, 0ffh, 0ffh, 0h
+l5y Letter < 5, offset l5y + sizeof l5y >
+    BYTE 0h, 0ffh, 0ffh, 0ffh, 0h
+    BYTE 0ffh, 0h, 0ffh, 0h, 0ffh
+    BYTE 0ffh, 0ffh, 0h, 0ffh, 0ffh
+    BYTE 0ffh, 0ffh, 0h, 0ffh, 0ffh
+    BYTE 0ffh, 0ffh, 0h, 0ffh, 0ffh
+l5z Letter < 5, offset l5z + sizeof l5z >
+    BYTE 0h, 0h, 0h, 0h, 0h
+    BYTE 0ffh, 0ffh, 0ffh, 0h, 0ffh
+    BYTE 0ffh, 0ffh, 0h, 0ffh, 0ffh
+    BYTE 0ffh, 0h, 0ffh, 0ffh, 0ffh
+    BYTE 0h, 0h, 0h, 0h, 0h
+l5exclamation Letter < 5, offset l5exclamation + sizeof l5exclamation >
+    BYTE 0ffh, 0h, 0ffh, 0ffh, 0ffh
+    BYTE 0ffh, 0h, 0ffh, 0ffh, 0ffh
+    BYTE 0ffh, 0h, 0ffh, 0ffh, 0ffh
+    BYTE 0ffh, 0ffh, 0ffh, 0ffh, 0ffh
+    BYTE 0ffh, 0h, 0ffh, 0ffh, 0ffh
+
+l7a Letter < 7, offset l7a + sizeof l7a >
+    BYTE 0ffh, 0ffh, 0ffh, 0h, 0ffh, 0ffh, 0ffh
+    BYTE 0ffh, 0ffh, 0h, 0ffh, 0h, 0ffh, 0ffh
+    BYTE 0ffh, 0ffh, 0h, 0ffh, 0h, 0ffh, 0ffh
+    BYTE 0ffh, 0h, 0ffh, 0ffh, 0ffh, 0h, 0ffh
+    BYTE 0ffh, 0h, 0h, 0h, 0h, 0h, 0ffh
+    BYTE 0h, 0ffh, 0ffh, 0ffh, 0ffh, 0ffh, 0h
+    BYTE 0h, 0ffh, 0ffh, 0ffh, 0ffh, 0ffh, 0h
+l7b Letter < 7, offset l7b + sizeof l7b >
+    BYTE 0h, 0h, 0h, 0h, 0ffh, 0ffh, 0ffh
+    BYTE 0ffh, 0h, 0ffh, 0ffh, 0h, 0ffh, 0ffh
+    BYTE 0ffh, 0h, 0ffh, 0ffh, 0h, 0ffh, 0ffh
+    BYTE 0ffh, 0h, 0h, 0h, 0h, 0h, 0ffh
+    BYTE 0ffh, 0h, 0ffh, 0ffh, 0ffh, 0ffh, 0h
+    BYTE 0ffh, 0h, 0ffh, 0ffh, 0ffh, 0ffh, 0h
+    BYTE 0h, 0h, 0h, 0h, 0h, 0h, 0ffh
+l7c Letter < 7, offset l7c + sizeof l7c >
+    BYTE 0ffh, 0ffh, 0h, 0h, 0h, 0h, 0ffh
+    BYTE 0ffh, 0h, 0ffh, 0ffh, 0ffh, 0ffh, 0h
+    BYTE 0h, 0ffh, 0ffh, 0ffh, 0ffh, 0ffh, 0ffh
+    BYTE 0h, 0ffh, 0ffh, 0ffh, 0ffh, 0ffh, 0ffh
+    BYTE 0h, 0ffh, 0ffh, 0ffh, 0ffh, 0ffh, 0ffh
+    BYTE 0ffh, 0h, 0ffh, 0ffh, 0ffh, 0ffh, 0h
+    BYTE 0ffh, 0ffh, 0h, 0h, 0h, 0h, 0ffh
+l7d Letter < 7, offset l7d + sizeof l7d >
+    BYTE 0h, 0h, 0h, 0h, 0h, 0h, 0ffh
+    BYTE 0h, 0ffh, 0ffh, 0ffh, 0ffh, 0h, 0ffh
+    BYTE 0h, 0ffh, 0ffh, 0ffh, 0ffh, 0ffh, 0h
+    BYTE 0h, 0ffh, 0ffh, 0ffh, 0ffh, 0ffh, 0h
+    BYTE 0h, 0ffh, 0ffh, 0ffh, 0ffh, 0ffh, 0h
+    BYTE 0h, 0ffh, 0ffh, 0ffh, 0ffh, 0h, 0ffh
+    BYTE 0h, 0h, 0h, 0h, 0h, 0h, 0ffh
+l7e Letter < 7, offset l7e + sizeof l7e >
+    BYTE 0h, 0h, 0h, 0h, 0h, 0h, 0h
+    BYTE 0ffh, 0h, 0ffh, 0ffh, 0ffh, 0ffh, 0h
+    BYTE 0ffh, 0h, 0ffh, 0ffh, 0ffh, 0ffh, 0ffh
+    BYTE 0ffh, 0h, 0h, 0h, 0ffh, 0ffh, 0ffh
+    BYTE 0ffh, 0h, 0ffh, 0ffh, 0ffh, 0ffh, 0ffh
+    BYTE 0ffh, 0h, 0ffh, 0ffh, 0ffh, 0ffh, 0h
+    BYTE 0h, 0h, 0h, 0h, 0h, 0h, 0h
+l7f Letter < 7, offset l7f + sizeof l7f >
+    BYTE 0h, 0h, 0h, 0h, 0h, 0h, 0h
+    BYTE 0ffh, 0h, 0ffh, 0ffh, 0ffh, 0ffh, 0h
+    BYTE 0ffh, 0h, 0ffh, 0ffh, 0ffh, 0ffh, 0ffh
+    BYTE 0ffh, 0h, 0h, 0h, 0ffh, 0ffh, 0ffh
+    BYTE 0ffh, 0h, 0ffh, 0ffh, 0ffh, 0ffh, 0ffh
+    BYTE 0ffh, 0h, 0ffh, 0ffh, 0ffh, 0ffh, 0ffh
+    BYTE 0h, 0h, 0h, 0ffh, 0ffh, 0ffh, 0ffh
+l7g Letter < 7, offset l7g + sizeof l7g >
+    BYTE 0ffh, 0ffh, 0h, 0h, 0h, 0h, 0ffh
+    BYTE 0ffh, 0h, 0ffh, 0ffh, 0ffh, 0ffh, 0ffh
+    BYTE 0h, 0ffh, 0ffh, 0ffh, 0ffh, 0ffh, 0ffh
+    BYTE 0h, 0ffh, 0ffh, 0ffh, 0ffh, 0h, 0h
+    BYTE 0h, 0ffh, 0ffh, 0ffh, 0ffh, 0ffh, 0h
+    BYTE 0ffh, 0h, 0ffh, 0ffh, 0ffh, 0ffh, 0h
+    BYTE 0ffh, 0ffh, 0h, 0h, 0h, 0h, 0ffh
+l7h Letter < 7, offset l7h + sizeof l7h >
+    BYTE 0h, 0h, 0h, 0ffh, 0h, 0h, 0h
+    BYTE 0ffh, 0h, 0ffh, 0ffh, 0ffh, 0h, 0ffh
+    BYTE 0ffh, 0h, 0ffh, 0ffh, 0ffh, 0h, 0ffh
+    BYTE 0ffh, 0h, 0h, 0h, 0h, 0h, 0ffh
+    BYTE 0ffh, 0h, 0ffh, 0ffh, 0ffh, 0h, 0ffh
+    BYTE 0ffh, 0h, 0ffh, 0ffh, 0ffh, 0h, 0ffh
+    BYTE 0h, 0h, 0h, 0ffh, 0h, 0h, 0h
+l7i Letter < 7, offset l7i + sizeof l7i >
+    BYTE 0h, 0h, 0h, 0h, 0h, 0h, 0h
+    BYTE 0ffh, 0ffh, 0ffh, 0h, 0ffh, 0ffh, 0ffh
+    BYTE 0ffh, 0ffh, 0ffh, 0h, 0ffh, 0ffh, 0ffh
+    BYTE 0ffh, 0ffh, 0ffh, 0h, 0ffh, 0ffh, 0ffh
+    BYTE 0ffh, 0ffh, 0ffh, 0h, 0ffh, 0ffh, 0ffh
+    BYTE 0ffh, 0ffh, 0ffh, 0h, 0ffh, 0ffh, 0ffh
+    BYTE 0h, 0h, 0h, 0h, 0h, 0h, 0h
+l7j Letter < 7, offset l7j + sizeof l7j >
+    BYTE 0ffh, 0ffh, 0ffh, 0ffh, 0h, 0h, 0h
+    BYTE 0ffh, 0ffh, 0ffh, 0ffh, 0ffh, 0h, 0ffh
+    BYTE 0ffh, 0ffh, 0ffh, 0ffh, 0ffh, 0h, 0ffh
+    BYTE 0h, 0h, 0h, 0ffh, 0ffh, 0h, 0ffh
+    BYTE 0ffh, 0h, 0ffh, 0ffh, 0ffh, 0h, 0ffh
+    BYTE 0ffh, 0h, 0ffh, 0ffh, 0ffh, 0h, 0ffh
+    BYTE 0ffh, 0ffh, 0h, 0h, 0h, 0ffh, 0ffh
+l7k Letter < 7, offset l7k + sizeof l7k >
+    BYTE 0h, 0h, 0h, 0ffh, 0ffh, 0h, 0h
+    BYTE 0ffh, 0h, 0ffh, 0ffh, 0h, 0ffh, 0ffh
+    BYTE 0ffh, 0h, 0ffh, 0h, 0ffh, 0ffh, 0ffh
+    BYTE 0ffh, 0h, 0h, 0ffh, 0ffh, 0ffh, 0ffh
+    BYTE 0ffh, 0h, 0ffh, 0h, 0ffh, 0ffh, 0ffh
+    BYTE 0ffh, 0h, 0ffh, 0ffh, 0h, 0ffh, 0ffh
+    BYTE 0ffh, 0h, 0ffh, 0ffh, 0ffh, 0h, 0ffh
+    BYTE 0h, 0h, 0h, 0ffh, 0h, 0h, 0h
+    BYTE 0ffh, 0h, 0ffh, 0ffh, 0ffh, 0ffh, 0ffh
+l7l Letter < 7, offset l7l + sizeof l7l >
+    BYTE 0h, 0h, 0h, 0ffh, 0ffh, 0ffh, 0ffh
+    BYTE 0ffh, 0h, 0ffh, 0ffh, 0ffh, 0ffh, 0ffh
+    BYTE 0ffh, 0h, 0ffh, 0ffh, 0ffh, 0ffh, 0ffh
+    BYTE 0ffh, 0h, 0ffh, 0ffh, 0ffh, 0ffh, 0ffh
+    BYTE 0ffh, 0h, 0ffh, 0ffh, 0ffh, 0ffh, 0ffh
+    BYTE 0ffh, 0h, 0ffh, 0ffh, 0ffh, 0ffh, 0h
+    BYTE 0h, 0h, 0h, 0h, 0h, 0h, 0h
+l7m Letter < 7, offset l7m + sizeof l7m >
+    BYTE 0h, 0h, 0h, 0ffh, 0h, 0h, 0h
+    BYTE 0ffh, 0h, 0h, 0ffh, 0h, 0h, 0ffh
+    BYTE 0ffh, 0h, 0ffh, 0h, 0ffh, 0h, 0ffh
+    BYTE 0ffh, 0h, 0ffh, 0h, 0ffh, 0h, 0ffh
+    BYTE 0ffh, 0h, 0ffh, 0ffh, 0ffh, 0h, 0ffh
+    BYTE 0ffh, 0h, 0ffh, 0ffh, 0ffh, 0h, 0ffh
+    BYTE 0h, 0h, 0h, 0ffh, 0h, 0h, 0h
+l7n Letter < 7, offset l7n + sizeof l7n >
+    BYTE 0h, 0h, 0h, 0ffh, 0h, 0h, 0h
+    BYTE 0ffh, 0h, 0h, 0ffh, 0ffh, 0h, 0ffh
+    BYTE 0ffh, 0h, 0h, 0ffh, 0ffh, 0h, 0ffh
+    BYTE 0ffh, 0h, 0ffh, 0h, 0ffh, 0h, 0ffh
+    BYTE 0ffh, 0h, 0ffh, 0ffh, 0h, 0h, 0ffh
+    BYTE 0ffh, 0h, 0ffh, 0ffh, 0h, 0h, 0ffh
+    BYTE 0h, 0h, 0h, 0ffh, 0h, 0h, 0h
+l7o Letter < 7, offset l7o + sizeof l7o >
+    BYTE 0ffh, 0ffh, 0h, 0h, 0h, 0ffh, 0ffh
+    BYTE 0ffh, 0h, 0ffh, 0ffh, 0ffh, 0h, 0ffh
+    BYTE 0h, 0ffh, 0ffh, 0ffh, 0ffh, 0ffh, 0h
+    BYTE 0h, 0ffh, 0ffh, 0ffh, 0ffh, 0ffh, 0h
+    BYTE 0h, 0ffh, 0ffh, 0ffh, 0ffh, 0ffh, 0h
+    BYTE 0ffh, 0h, 0ffh, 0ffh, 0ffh, 0h, 0ffh
+    BYTE 0ffh, 0ffh, 0h, 0h, 0h, 0ffh, 0ffh
+l7p Letter < 7, offset l7p + sizeof l7p >
+    BYTE 0h, 0h, 0h, 0h, 0h, 0h, 0ffh
+    BYTE 0ffh, 0h, 0ffh, 0ffh, 0ffh, 0h, 0ffh
+    BYTE 0ffh, 0h, 0ffh, 0ffh, 0ffh, 0h, 0ffh
+    BYTE 0ffh, 0h, 0ffh, 0ffh, 0ffh, 0h, 0ffh
+    BYTE 0h, 0h, 0h, 0h, 0h, 0h, 0ffh
+    BYTE 0ffh, 0h, 0ffh, 0ffh, 0ffh, 0ffh, 0ffh
+    BYTE 0h, 0h, 0h, 0ffh, 0ffh, 0ffh, 0ffh
+l7q Letter < 7, offset l7q + sizeof l7q >
+    BYTE 0ffh, 0ffh, 0h, 0h, 0h, 0ffh, 0ffh
+    BYTE 0ffh, 0h, 0ffh, 0ffh, 0ffh, 0h, 0ffh
+    BYTE 0h, 0ffh, 0ffh, 0ffh, 0ffh, 0ffh, 0h
+    BYTE 0h, 0ffh, 0ffh, 0ffh, 0ffh, 0ffh, 0h
+    BYTE 0h, 0ffh, 0ffh, 0ffh, 0h, 0ffh, 0h
+    BYTE 0ffh, 0h, 0ffh, 0ffh, 0ffh, 0h, 0ffh
+    BYTE 0ffh, 0ffh, 0h, 0h, 0h, 0ffh, 0h
+l7r Letter < 7, offset l7r + sizeof l7r >
+    BYTE 0h, 0h, 0h, 0h, 0h, 0h, 0ffh
+    BYTE 0ffh, 0h, 0ffh, 0ffh, 0ffh, 0ffh, 0h
+    BYTE 0ffh, 0h, 0ffh, 0ffh, 0ffh, 0ffh, 0h
+    BYTE 0ffh, 0h, 0h, 0h, 0h, 0h, 0ffh
+    BYTE 0ffh, 0h, 0ffh, 0ffh, 0h, 0ffh, 0ffh
+    BYTE 0ffh, 0h, 0ffh, 0ffh, 0ffh, 0h, 0ffh
+    BYTE 0h, 0h, 0h, 0ffh, 0h, 0h, 0h
+l7s Letter < 7, offset l7s + sizeof l7s >
+    BYTE 0ffh, 0h, 0h, 0h, 0h, 0h, 0ffh
+    BYTE 0h, 0ffh, 0ffh, 0ffh, 0ffh, 0ffh, 0h
+    BYTE 0h, 0ffh, 0ffh, 0ffh, 0ffh, 0ffh, 0ffh
+    BYTE 0ffh, 0h, 0h, 0h, 0h, 0h, 0ffh
+    BYTE 0ffh, 0ffh, 0ffh, 0ffh, 0ffh, 0ffh, 0h
+    BYTE 0h, 0ffh, 0ffh, 0ffh, 0ffh, 0ffh, 0h
+    BYTE 0ffh, 0h, 0h, 0h, 0h, 0h, 0ffh
+l7t Letter < 7, offset l7t + sizeof l7t >
+    BYTE 0h, 0h, 0h, 0h, 0h, 0h, 0h
+    BYTE 0ffh, 0ffh, 0ffh, 0h, 0ffh, 0ffh, 0ffh
+    BYTE 0ffh, 0ffh, 0ffh, 0h, 0ffh, 0ffh, 0ffh
+    BYTE 0ffh, 0ffh, 0ffh, 0h, 0ffh, 0ffh, 0ffh
+    BYTE 0ffh, 0ffh, 0ffh, 0h, 0ffh, 0ffh, 0ffh
+    BYTE 0ffh, 0ffh, 0ffh, 0h, 0ffh, 0ffh, 0ffh
+    BYTE 0ffh, 0ffh, 0h, 0h, 0h, 0ffh, 0ffh
+l7u Letter < 7, offset l7u + sizeof l7u >
+    BYTE 0h, 0h, 0h, 0ffh, 0h, 0h, 0h
+    BYTE 0ffh, 0h, 0ffh, 0ffh, 0ffh, 0h, 0ffh
+    BYTE 0ffh, 0h, 0ffh, 0ffh, 0ffh, 0h, 0ffh
+    BYTE 0ffh, 0h, 0ffh, 0ffh, 0ffh, 0h, 0ffh
+    BYTE 0ffh, 0h, 0ffh, 0ffh, 0ffh, 0h, 0ffh
+    BYTE 0ffh, 0h, 0ffh, 0ffh, 0ffh, 0h, 0ffh
+    BYTE 0ffh, 0ffh, 0h, 0h, 0h, 0ffh, 0ffh
+l7v Letter < 7, offset l7v + sizeof l7v >
+    BYTE 0h, 0h, 0h, 0ffh, 0h, 0h, 0h
+    BYTE 0ffh, 0h, 0ffh, 0ffh, 0ffh, 0h, 0ffh
+    BYTE 0ffh, 0h, 0ffh, 0ffh, 0ffh, 0h, 0ffh
+    BYTE 0ffh, 0h, 0ffh, 0ffh, 0ffh, 0h, 0ffh
+    BYTE 0ffh, 0ffh, 0h, 0ffh, 0h, 0ffh, 0ffh
+    BYTE 0ffh, 0ffh, 0h, 0ffh, 0h, 0ffh, 0ffh
+    BYTE 0ffh, 0ffh, 0ffh, 0h, 0ffh, 0ffh, 0ffh
+l7w Letter < 7, offset l7w + sizeof l7w >
+    BYTE 0h, 0h, 0h, 0ffh, 0h, 0h, 0h
+    BYTE 0ffh, 0h, 0ffh, 0ffh, 0ffh, 0h, 0ffh
+    BYTE 0ffh, 0h, 0ffh, 0ffh, 0ffh, 0h, 0ffh
+    BYTE 0ffh, 0h, 0ffh, 0ffh, 0ffh, 0h, 0ffh
+    BYTE 0ffh, 0h, 0ffh, 0h, 0ffh, 0h, 0ffh
+    BYTE 0ffh, 0h, 0ffh, 0h, 0ffh, 0h, 0ffh
+    BYTE 0ffh, 0ffh, 0h, 0ffh, 0h, 0ffh, 0ffh
+l7x Letter < 7, offset l7x + sizeof l7x >
+    BYTE 0h, 0h, 0h, 0ffh, 0h, 0h, 0h
+    BYTE 0ffh, 0h, 0ffh, 0ffh, 0ffh, 0h, 0ffh
+    BYTE 0ffh, 0ffh, 0h, 0ffh, 0h, 0ffh, 0ffh
+    BYTE 0ffh, 0ffh, 0ffh, 0h, 0ffh, 0ffh, 0ffh
+    BYTE 0ffh, 0ffh, 0h, 0ffh, 0h, 0ffh, 0ffh
+    BYTE 0ffh, 0h, 0ffh, 0ffh, 0ffh, 0h, 0ffh
+    BYTE 0h, 0h, 0h, 0ffh, 0h, 0h, 0h
+l7y Letter < 7, offset l7y + sizeof l7y >
+    BYTE 0h, 0h, 0h, 0ffh, 0h, 0h, 0h
+    BYTE 0ffh, 0h, 0ffh, 0ffh, 0ffh, 0h, 0ffh
+    BYTE 0ffh, 0ffh, 0h, 0ffh, 0h, 0ffh, 0ffh
+    BYTE 0ffh, 0ffh, 0ffh, 0h, 0ffh, 0ffh, 0ffh
+    BYTE 0ffh, 0ffh, 0ffh, 0h, 0ffh, 0ffh, 0ffh
+    BYTE 0ffh, 0ffh, 0ffh, 0h, 0ffh, 0ffh, 0ffh
+    BYTE 0ffh, 0ffh, 0h, 0h, 0h, 0ffh, 0ffh
+l7z Letter < 7, offset l7z + sizeof l7z >
+    BYTE 0h, 0h, 0h, 0h, 0h, 0h, 0h
+    BYTE 0h, 0ffh, 0ffh, 0ffh, 0ffh, 0h, 0ffh
+    BYTE 0ffh, 0ffh, 0ffh, 0ffh, 0h, 0ffh, 0ffh
+    BYTE 0ffh, 0ffh, 0ffh, 0h, 0ffh, 0ffh, 0ffh
+    BYTE 0ffh, 0ffh, 0h, 0ffh, 0ffh, 0ffh, 0ffh
+    BYTE 0ffh, 0h, 0ffh, 0ffh, 0ffh, 0ffh, 0h
+    BYTE 0h, 0h, 0h, 0h, 0h, 0h, 0h
+l7exclamation Letter < 7, offset l7exclamation + sizeof l7exclamation >
+    BYTE 0ffh, 0h, 0ffh, 0ffh, 0ffh, 0ffh, 0ffh
+    BYTE 0ffh, 0h, 0ffh, 0ffh, 0ffh, 0ffh, 0ffh
+    BYTE 0ffh, 0h, 0ffh, 0ffh, 0ffh, 0ffh, 0ffh
+    BYTE 0ffh, 0h, 0ffh, 0ffh, 0ffh, 0ffh, 0ffh
+    BYTE 0ffh, 0h, 0ffh, 0ffh, 0ffh, 0ffh, 0ffh
+    BYTE 0ffh, 0ffh, 0ffh, 0ffh, 0ffh, 0ffh, 0ffh
+    BYTE 0ffh, 0h, 0ffh, 0ffh, 0ffh, 0ffh, 0ffh
