@@ -16,23 +16,9 @@ include blit.inc
 include game.inc
 include keys.inc
 
-PLOT PROTO :DWORD, :DWORD, :DWORD
-int2fxpt PROTO :DWORD
-UnpackBitmap PROTO bmp:PTR EECS205BITMAP
-EdgesFromCenter PROTO centerpoint:DWORD, len:DWORD
-FXPTDivide PROTO :FXPT, :FXPT
-
-EXTERNDEF PI_INC_RECIP :FXPT
-EXTERNDEF PI_HALF :FXPT
-EXTERNDEF _dwWidth :DWORD
-EXTERNDEF _dwHeight :DWORD
-EXTERNDEF _bTransparent :BYTE
-EXTERNDEF _lpBytes :DWORD
-
 .DATA
 
-; Sprites
-
+;; Sprites
 include space-sprites\asm\nuke_000.asm
 include space-sprites\asm\nuke_001.asm
 include space-sprites\asm\nuke_002.asm
@@ -80,7 +66,7 @@ PLAYER_COLLIDER EECS205RECT <?, ?, ?, ?>
 NukeAnimation Animation { 0, 3, SIZEOF EECS205BITMAP, OFFSET nuke_000 }
 FighterAnimation Animation { 0, 3, SIZEOF EECS205BITMAP, OFFSET fighter_000 }
 
-Fighter Character { , , , OFFSET fighter_001 }
+Fighter Character { , 2, , OFFSET fighter_001 }
 
 ;; other
 asteroid_rotation FXPT 0
@@ -89,7 +75,7 @@ space_down BYTE 0
 
 rot_offset FXPT 0c900h ; approximately pi/2 to maximum possible accuracy
 
-Opacities BYTE 0ffh, 0dah, 09h, 0
+opacities BYTE 4 DUP(0ffh), 4 DUP(0dah), 4 DUP(09h), 4 DUP(0)
 
 .CODE
 
@@ -190,9 +176,20 @@ CalculateCollider PROC USES eax edx edi bmpPtr:PTR EECS205BITMAP, colliderPtr:PT
   mov cosa, eax
 
   mov eax, _dwWidth
+  cmp eax, _dwHeight
+  jg  dont_swap_wh
+  mov eax, _dwHeight
+
+  dont_swap_wh:
+
   mov ebx, 2
   cdq
   div ebx
+  cmp edx, 0
+  jl  continue_comp
+  inc eax
+  continue_comp:
+
   invoke AXP, eax, sqrt2, 0
   mov r_sqrt2, eax
 
@@ -246,6 +243,15 @@ CalculateAsteroidCollider PROC
   invoke CalculateCollider, OFFSET asteroid_000, OFFSET asteroid_collider, 319, 239, asteroid_rotation
   ret
 CalculateAsteroidCollider ENDP
+
+UpdatePlayer PROC USES eax
+  mov eax, m_x
+  mov PLAYER_X, eax
+
+  mov eax, m_y
+  mov PLAYER_Y, eax
+  ret
+UpdatePlayer ENDP
 
 DrawPlayer PROC USES eax
   xor ebx, ebx
@@ -358,9 +364,9 @@ TogglePause ENDP
 GamePlay PROC USES eax ebx
   invoke UpdateTime
 
-  invoke TogglePause
-  cmp pause, 0
-  jne skip_frame
+  .if pause != 0
+    jmp skip_frame
+  .endif
 
   invoke cls
 
@@ -398,20 +404,23 @@ GamePlay PROC USES eax ebx
   jl  end_down
   jmp set_opacity
   end_up:
-    cmp eax, LENGTHOF Opacities
+    cmp eax, LENGTHOF opacities
     jl  set_opacity
-    mov (Character PTR Fighter).fademod, -1
+    neg ebx
+    mov (Character PTR Fighter).fademod, ebx
     jmp set_opacity
   end_down:
     cmp eax, 0
     jg  set_opacity
-    mov (Character PTR Fighter).fademod, 1
+    neg ebx
+    mov (Character PTR Fighter).fademod, ebx
     jmp set_opacity
   set_opacity:
     mov (Character PTR Fighter).fade, eax
-    mov eax, [ OFFSET Opacities + eax ]
+    mov eax, [ OFFSET opacities + eax ]
     mov (Character PTR Fighter).opacity, eax
 
+  invoke UpdatePlayer
   invoke DrawPlayer
   invoke CalculatePlayerCollider
 
@@ -426,6 +435,7 @@ GamePlay PROC USES eax ebx
 
   no_collision:
   skip_frame:
+    invoke TogglePause
   	ret
 GamePlay ENDP
 

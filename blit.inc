@@ -30,3 +30,13 @@ BasicBlit PROTO STDCALL ptrBitmap:PTR EECS205BITMAP, xcenter:DWORD, ycenter:DWOR
 RotateBlit PROTO STDCALL ptrBitmap:PTR EECS205BITMAP, xcenter:DWORD, ycenter:DWORD, angle:FXPT, opacity:DWORD
 
 CheckIntersectRect PROTO STDCALL one:PTR EECS205RECT, two:PTR EECS205RECT
+
+int2fxpt PROTO :DWORD
+UnpackBitmap PROTO :PTR EECS205BITMAP
+EdgesFromCenter PROTO :DWORD, :DWORD
+FXPTDivide PROTO :FXPT, :FXPT
+
+EXTERNDEF _dwWidth  :DWORD
+EXTERNDEF _dwHeight :DWORD
+EXTERNDEF _bTransparent :BYTE
+EXTERNDEF _lpBytes  :DWORD

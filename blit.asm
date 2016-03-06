@@ -15,14 +15,6 @@ include lines.inc
 include blit.inc
 include game.inc
 
-;; import stuff from lines.asm
-PLOT PROTO :DWORD, :DWORD, :DWORD
-Abs PROTO :DWORD
-
-PUBLIC EdgesFromCenter
-PUBLIC _dwWidth
-PUBLIC _dwHeight
-
 .DATA
 
   ;; for to unpack bitmap

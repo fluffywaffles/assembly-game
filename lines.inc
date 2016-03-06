@@ -11,3 +11,6 @@ externdef ScreenBitsPtr:DWORD
 FixedSin proto angle:FXPT
 FixedCos proto angle:FXPT
 DrawLine proto x0:DWORD, y0:DWORD, x1:DWORD, y1:DWORD, color:DWORD
+
+PLOT PROTO x:DWORD, y:DWORD, color:DWORD
+Abs  PROTO x:DWORD
