@@ -63,7 +63,7 @@ PLAYER_COLLIDER EECS205RECT <?, ?, ?, ?>
 NukeAnimation Animation { 0, 3, SIZEOF EECS205BITMAP,, OFFSET nuke_000 }
 FighterAnimation Animation { 0, 3, SIZEOF EECS205BITMAP,, OFFSET fighter_000 }
 
-Fighter Character { , , , , , 2, }
+Fighter Character { , , , , , 1, }
 
 ;; other
 asteroid_rotation FXPT 0
@@ -75,6 +75,8 @@ rot_offset FXPT 0c900h ; approximately pi/2 to maximum possible accuracy
 wCollide DWORD l7c, l7o, l7l,
                l7l, l7i, l7d,
                l7e, l7exclamation
+
+opacities BYTE 4 DUP(0ffh), 4 DUP(0dah), 4 DUP(09h), 4 DUP(0)
 
 IFDEF DEBUG
 
@@ -91,8 +93,6 @@ l7alpha DWORD l7a, l7b, l7c, l7d, l7e, l7f, l7g, l7h, l7i, l7j, l7k, l7l, l7m,
               l7exclamation
 
 ENDIF
-
-opacities BYTE 4 DUP(0ffh), 4 DUP(0dah), 4 DUP(09h), 4 DUP(0)
 
 .CODE
 
@@ -316,23 +316,24 @@ GamePlay PROC USES eax ebx
 
   mov eax, (Character PTR Fighter).fade
   mov ebx, (Character PTR Fighter).fademod
+  mov edx, LENGTHOF opacities
+  dec edx
   add eax, ebx
   cmp ebx, 0
   jg  end_up
   jl  end_down
   jmp set_opacity
   end_up:
-    cmp eax, LENGTHOF opacities
+    cmp eax, edx
     jl  set_opacity
     neg ebx
     mov (Character PTR Fighter).fademod, ebx
     jmp set_opacity
   end_down:
     cmp eax, 0
-    jg  set_opacity
+    jne set_opacity
     neg ebx
     mov (Character PTR Fighter).fademod, ebx
-    jmp set_opacity
   set_opacity:
     mov (Character PTR Fighter).fade, eax
     mov eax, [ OFFSET opacities + eax ]
