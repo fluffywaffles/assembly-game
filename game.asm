@@ -20,9 +20,10 @@ PLOT PROTO :DWORD, :DWORD, :DWORD
 int2fxpt PROTO :DWORD
 UnpackBitmap PROTO bmp:PTR EECS205BITMAP
 EdgesFromCenter PROTO centerpoint:DWORD, len:DWORD
+FXPTDivide PROTO :FXPT, :FXPT
 
-EXTERNDEF DEBUG :DWORD
 EXTERNDEF PI_INC_RECIP :FXPT
+EXTERNDEF PI_HALF :FXPT
 EXTERNDEF _dwWidth :DWORD
 EXTERNDEF _dwHeight :DWORD
 
@@ -35,8 +36,8 @@ include space-sprites\asm\nuke_001.asm
 include space-sprites\asm\nuke_002.asm
 
 include space-sprites\asm\fighter_000.asm
-include space-sprites\asm\fighter_001.asm
 include space-sprites\asm\fighter_002.asm
+include space-sprites\asm\fighter_001.asm
 
 include space-sprites\asm\asteroid_000.asm
 include space-sprites\asm\asteroid_001.asm
@@ -45,13 +46,11 @@ include space-sprites\asm\asteroid_003.asm
 include space-sprites\asm\asteroid_004.asm
 include space-sprites\asm\asteroid_005.asm
 
-;; Screen data
-SCREEN_X_MIN DWORD 0
-SCREEN_X_MAX DWORD 639
-SCREEN_Y_MIN DWORD 0
-SCREEN_Y_MAX DWORD 479
+;; constant
+sqrt2 FXPT 00016a0ah ; approx. 1.41421508789
 
-SCREEN_SIZE DWORD 307200
+pause BYTE 0
+next_pause FXPT 0
 
 ;; Mouse data
 m_x DWORD ?
@@ -75,10 +74,16 @@ CURRENT_PLAYER_SPRITE DWORD ? ; PTR EECS205BITMAP
 
 PLAYER_COLLIDER EECS205RECT <?, ?, ?, ?>
 
+;; Animations
+NukeAnimation Animation { 0, 3, SIZEOF EECS205BITMAP, OFFSET nuke_000 }
+FighterAnimation Animation { 0, 3, SIZEOF EECS205BITMAP, OFFSET fighter_000 }
+
 ;; other
-asteroid_rotation FXPT 50000h
+asteroid_rotation FXPT 0
 asteroid_collider EECS205RECT <?, ?, ?, ?>
 space_down BYTE 0
+
+rot_offset FXPT 0c900h
 
 .CODE
 
@@ -150,8 +155,10 @@ UnpackMouse PROC
   ret
 UnpackMouse ENDP
 
-CalculateCollider PROC USES eax edx edi bmpPtr:PTR EECS205BITMAP, colliderPtr:PTR EECS205RECT, x:DWORD, y:DWORD
+CalculateCollider PROC USES eax edx edi bmpPtr:PTR EECS205BITMAP, colliderPtr:PTR EECS205RECT, x:DWORD, y:DWORD, rotation:FXPT
   LOCAL left:DWORD, top:DWORD, right:DWORD, bottom:DWORD
+  LOCAL r_sqrt2:FXPT, sina:FXPT, cosa:FXPT, xcomp:FXPT, ycomp:FXPT
+  LOCAL x_cos:FXPT, x_sin:FXPT, y_cos:FXPT, y_sin:FXPT, xpcos:FXPT, xpsin:FXPT, ypcos:FXPT, ypsin:FXPT
 
   invoke UnpackBitmap, bmpPtr
   mov edi, colliderPtr
@@ -168,43 +175,104 @@ CalculateCollider PROC USES eax edx edi bmpPtr:PTR EECS205BITMAP, colliderPtr:PT
   mov top, eax
   mov bottom, edx
 
+  mov edx, rotation
+  add edx, rot_offset
+  neg edx
+  invoke FixedSin, edx
+  mov sina, eax
+  invoke FixedCos, edx
+  mov cosa, eax
+
+  invoke FXPTDivide, _dwWidth, 20000h
+  invoke AXP, eax, sqrt2, eax
+  mov r_sqrt2, eax
+
+  invoke AXP, r_sqrt2, cosa, 0
+  mov xcomp, eax
+  invoke AXP, r_sqrt2, sina, 0
+  mov ycomp, eax
+
+  mov eax, x
+  sub eax, xcomp
+  mov x_cos, eax
+  add eax, xcomp
+  add eax, xcomp
+  mov xpcos, eax
+  sub eax, xcomp
+  sub eax, ycomp
+  mov x_sin, eax
+  add eax, ycomp
+  add eax, ycomp
+  mov xpsin, eax
+
+  mov eax, y
+  sub eax, xcomp
+  mov y_cos, eax
+  add eax, xcomp
+  add eax, xcomp
+  mov ypcos, eax
+  sub eax, xcomp
+  sub eax, ycomp
+  mov y_sin, eax
+  add eax, ycomp
+  add eax, ycomp
+  mov ypsin, eax
+
   IFDEF DEBUG
-  invoke DrawLine, left, top, left, bottom, 03h
-  invoke DrawLine, right, top, right, bottom, 03h
-  invoke DrawLine, left, top, right, top, 03h
-  invoke DrawLine, left, bottom, right, bottom, 03h
+  invoke DrawLine, x_sin, y_cos, xpcos, y_sin, 03h
+  invoke DrawLine, x_sin, y_cos, x_cos, ypsin, 03h
+  invoke DrawLine, xpsin, ypcos, xpcos, y_sin, 03h
+  invoke DrawLine, xpsin, ypcos, x_cos, ypsin, 03h
   ENDIF
 
   ret
 CalculateCollider ENDP
 
 CalculatePlayerCollider PROC
-  invoke CalculateCollider, CURRENT_PLAYER_SPRITE, OFFSET PLAYER_COLLIDER, PLAYER_X, PLAYER_Y
+  invoke CalculateCollider, CURRENT_PLAYER_SPRITE, OFFSET PLAYER_COLLIDER, PLAYER_X, PLAYER_Y, PLAYER_ANGLE
   ret
 CalculatePlayerCollider ENDP
 
 CalculateAsteroidCollider PROC
-  invoke CalculateCollider, OFFSET asteroid_000, OFFSET asteroid_collider, 319, 239
+  invoke CalculateCollider, OFFSET asteroid_000, OFFSET asteroid_collider, 319, 239, asteroid_rotation
   ret
 CalculateAsteroidCollider ENDP
 
 DrawPlayer PROC USES eax
-  movzx eax, m_click
-  cmp eax, 1
-  je  with_thrust
-  mov eax, KeyPress
-  test eax, VK_SPACE
-  jne with_thrust
-  jmp no_thrust
+  xor ebx, ebx
 
-  with_thrust:
-    invoke RotateBlit, OFFSET fighter_001, PLAYER_X, PLAYER_Y, PLAYER_ANGLE
-    jmp finish
+  click:
+    movzx eax, m_click
+    cmp eax, 1
+    jne  space
+    inc ebx
 
-  no_thrust:
-    invoke RotateBlit, OFFSET fighter_000, PLAYER_X, PLAYER_Y, PLAYER_ANGLE
+  space:
+    mov eax, KeyPress
+    cmp eax, VK_SPACE
+    jne draw
+    inc ebx
+
+  draw:
+    cmp ebx, 2
+    jl  less_thrust
+
+    lotsa_thrust:
+      mov CURRENT_PLAYER_SPRITE, OFFSET fighter_001
+      jmp finish
+
+    less_thrust:
+      cmp ebx, 1
+      jl  no_thrust
+
+      mov CURRENT_PLAYER_SPRITE, OFFSET fighter_002
+      jmp finish
+
+    no_thrust:
+      mov CURRENT_PLAYER_SPRITE, OFFSET fighter_000
 
   finish:
+    invoke RotateBlit, CURRENT_PLAYER_SPRITE, PLAYER_X, PLAYER_Y, PLAYER_ANGLE
     ret
 DrawPlayer ENDP
 
@@ -259,21 +327,52 @@ DrawCollideWarning PROC
   ret
 DrawCollideWarning ENDP
 
+TogglePause PROC USES eax
+  mov eax, total_t
+  cmp eax, next_pause
+  jl  _end
+  mov eax, KeyPress
+  cmp eax, VK_P
+  je  toggle
+  jmp _end
+  toggle:
+    not pause
+    mov eax, total_t
+    add eax, delta_t
+    add eax, delta_t
+    add eax, delta_t
+    mov next_pause, eax
+  _end:
+    ret
+TogglePause ENDP
+
 GamePlay PROC USES eax ebx
+  invoke UpdateTime
+
+  invoke TogglePause
+  cmp pause, 0
+  jne skip_frame
+
   invoke cls
 
   IFDEF DEBUG
-  movzx ebx, space_down
-  cmp ebx, 0
-  jne yes_space_down
+  mov eax, KeyPress
+  cmp eax, VK_SPACE
+  je yes_space_down
   invoke PLOT, 12, 10, 0c0h
   jmp continue
   yes_space_down:
     invoke PLOT, 12, 10, 01ch
   continue:
+  cmp eax, VK_P
+  je yes_p_down
+  invoke PLOT, 14, 10, 0c0h
+  jmp continue_p
+  yes_p_down:
+    invoke PLOT, 14, 10, 01ch
+  continue_p:
   ENDIF
 
-  invoke UpdateTime
   invoke UnpackMouse
 
   mov eax, m_x
@@ -295,6 +394,7 @@ GamePlay PROC USES eax ebx
   invoke DrawCollideWarning
 
   no_collision:
+  skip_frame:
   	ret
 GamePlay ENDP
 

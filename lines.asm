@@ -12,12 +12,8 @@
 
 include stars.inc
 include lines.inc
-
-PUBLIC SCREEN_X_MIN
-PUBLIC SCREEN_X_MAX
-PUBLIC SCREEN_Y_MIN
-PUBLIC SCREEN_Y_MAX
-PUBLIC PI_INC_RECIP
+include blit.inc
+include game.inc
 
 .DATA
 ;;  These are some useful constants (fixed point values that correspond to important angles)
@@ -26,10 +22,8 @@ PI =  205887	                  ;;  PI
 TWO_PI	= 411774                ;;  2 * PI
 PI_INC_RECIP =  5340353        	;;  256 / PI
 
-SCREEN_X_MIN = 0
-SCREEN_X_MAX = 640
-SCREEN_Y_MIN = 0
-SCREEN_Y_MAX = 480
+public PI_INC_RECIP
+public PI_HALF
 
 sign_flip BYTE ?
 
@@ -136,24 +130,24 @@ FixedCos ENDP
 
 CheckBounds PROC x0:DWORD, y0:DWORD, x1:DWORD, y1:DWORD
   cmp x0, SCREEN_X_MAX
-  jge fail
+  jg  fail
   cmp x0, SCREEN_X_MIN
-  jl  fail
+  jle fail
 
   cmp x1, SCREEN_X_MAX
-  jge fail
+  jg  fail
   cmp x1, SCREEN_X_MIN
-  jl  fail
+  jle fail
 
   cmp y0, SCREEN_Y_MAX
-  jge fail
+  jg  fail
   cmp y0, SCREEN_Y_MIN
-  jl  fail
+  jle fail
 
   cmp y1, SCREEN_Y_MAX
-  jge fail
+  jg  fail
   cmp y1, SCREEN_Y_MIN
-  jl  fail
+  jle fail
 
   ; if all checks pass, succeed
   mov eax, 1
@@ -191,7 +185,7 @@ ScreenBitsIndex PROC USES edx x:DWORD, y:DWORD
   while_loop:
     cmp edx, 0
     jl  after
-    add eax, SCREEN_X_MAX
+    add eax, SCREEN_WIDTH
     sub edx, 1
     jmp while_loop
   after:

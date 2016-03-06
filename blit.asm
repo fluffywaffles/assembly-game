@@ -13,17 +13,12 @@
 include stars.inc
 include lines.inc
 include blit.inc
+include game.inc
 
 ;; import stuff from lines.asm
 PLOT PROTO :DWORD, :DWORD, :DWORD
 Abs PROTO :DWORD
 
-EXTERNDEF SCREEN_X_MIN:DWORD
-EXTERNDEF SCREEN_X_MAX:DWORD
-EXTERNDEF SCREEN_Y_MIN:DWORD
-EXTERNDEF SCREEN_Y_MAX:DWORD
-
-PUBLIC DEBUG
 PUBLIC EdgesFromCenter
 PUBLIC _dwWidth
 PUBLIC _dwHeight
@@ -41,8 +36,6 @@ PUBLIC _dwHeight
   _rt DWORD ?
   _rr DWORD ?
   _rb DWORD ?
-
-  DEBUG = 0
 
 .CODE
 
@@ -319,7 +312,7 @@ RotateBlit PROC lpBmp:PTR EECS205BITMAP, xcenter:DWORD, ycenter:DWORD, angle:FXP
           cmp eax, 1
           jne for_y_eval
 
-          IFE DEBUG
+          IFDEF DEBUG
           invoke PLOT, drawX, 15, 0c0h
           ENDIF
 
@@ -327,7 +320,7 @@ RotateBlit PROC lpBmp:PTR EECS205BITMAP, xcenter:DWORD, ycenter:DWORD, angle:FXP
           cmp eax, 1
           jne for_y_eval
 
-          IFE DEBUG
+          IFDEF DEBUG
           invoke PLOT, 15, drawY, 0c0h
           ENDIF
 

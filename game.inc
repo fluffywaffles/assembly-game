@@ -35,8 +35,27 @@ EXTERNDEF KeyPress:DWORD
 GameInit PROTO
 GamePlay PROTO
 
+;; DEBUG flag
 
+DEBUG = 0
 
+;; Screen data
 
+SCREEN_X_MIN = 0
+SCREEN_X_MAX = 639
+SCREEN_Y_MIN = 0
+SCREEN_Y_MAX = 479
 
+SCREEN_WIDTH = SCREEN_X_MAX - SCREEN_X_MIN + 1
+SCREEN_HEIGHT = SCREEN_Y_MAX - SCREEN_Y_MIN + 1
 
+SCREEN_SIZE = SCREEN_WIDTH * SCREEN_HEIGHT
+
+;; My structs idk
+
+Animation STRUCT
+  current_frame DWORD ?
+  frame_count DWORD ?
+  frame_size DWORD ?
+  frame_ptr DWORD ?
+Animation ENDS
