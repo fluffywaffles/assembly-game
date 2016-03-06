@@ -1,0 +1,17 @@
+
+EXTERNDEF m_x :DWORD
+EXTERNDEF m_y :DWORD
+
+EXTERNDEF m_click  :BYTE
+EXTERNDEF m_rclick :BYTE
+
+EXTERNDEF k_space :BYTE
+EXTERNDEF k_p     :BYTE
+EXTERNDEF k_enter :BYTE
+EXTERNDEF k_up    :BYTE
+EXTERNDEF k_left  :BYTE
+EXTERNDEF k_right :BYTE
+EXTERNDEF k_down  :BYTE
+
+UnpackMouse PROTO
+UnpackKeyPress PROTO

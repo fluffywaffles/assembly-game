@@ -14,6 +14,7 @@ include stars.inc
 include lines.inc
 include blit.inc
 include game.inc
+include input.inc
 include keys.inc
 
 .DATA
@@ -39,12 +40,6 @@ sqrt2 FXPT 00016a0ah ; approx. 1.41421508789
 
 pause BYTE 0
 next_pause FXPT 0
-
-;; Mouse data
-m_x DWORD ?
-m_y DWORD ?
-m_click BYTE ?
-m_rclick BYTE ?
 
 ;; Timing Data
 delta_t DWORD 2000h ; AKA 1/16
@@ -103,49 +98,6 @@ UpdateTime PROC USES eax
   mov total_t, eax
   ret
 UpdateTime ENDP
-
-GetZF PROC USES eax
-  lahf
-  shl eax, 1  ; cut off SF
-  shr eax, 22 ; trunc to just zf
-  ret
-GetZF ENDP
-
-UnpackMouse PROC
-  mov esi, OFFSET MouseStatus
-
-  mov eax, [esi]     ; mx
-  mov m_x, eax
-
-  mov eax, [esi + 4] ; my
-  mov m_y, eax
-
-  mov eax, [esi + 8] ; buttons
-
-  test eax, MK_LBUTTON
-  invoke GetZF
-  mov m_click, al
-
-  test eax, MK_RBUTTON
-  invoke GetZF
-  mov m_rclick, al
-
-  IFDEF DEBUG
-  invoke PLOT, m_x, m_y, 01ch
-
-  movzx ebx, m_click
-  cmp ebx, 1
-  jne no_click
-  invoke PLOT, 10, 10, 01ch
-  jmp click_next
-  no_click:
-    invoke PLOT, 10, 10, 0c0h
-  click_next:
-
-  ENDIF
-
-  ret
-UnpackMouse ENDP
 
 CalculateCollider PROC USES eax edx edi bmpPtr:PTR EECS205BITMAP, colliderPtr:PTR EECS205RECT, x:DWORD, y:DWORD, rotation:FXPT
   LOCAL left:DWORD, top:DWORD, right:DWORD, bottom:DWORD
@@ -370,31 +322,8 @@ GamePlay PROC USES eax ebx
 
   invoke cls
 
-  IFDEF DEBUG
-  mov eax, KeyPress
-  cmp eax, VK_SPACE
-  je yes_space_down
-  invoke PLOT, 12, 10, 0c0h
-  jmp continue
-  yes_space_down:
-    invoke PLOT, 12, 10, 01ch
-  continue:
-  cmp eax, VK_P
-  je yes_p_down
-  invoke PLOT, 14, 10, 0c0h
-  jmp continue_p
-  yes_p_down:
-    invoke PLOT, 14, 10, 01ch
-  continue_p:
-  ENDIF
-
   invoke UnpackMouse
-
-  mov eax, m_x
-  mov PLAYER_X, eax
-
-  mov eax, m_y
-  mov PLAYER_Y, eax
+  invoke UnpackKeyPress
 
   mov eax, (Character PTR Fighter).fade
   mov ebx, (Character PTR Fighter).fademod
