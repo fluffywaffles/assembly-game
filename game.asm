@@ -1,7 +1,7 @@
 ; #########################################################################
 ;
 ;   game.asm - Assembly file for EECS205 Assignment 4/5
-;
+;   Jordan Timmerman
 ;
 ; #########################################################################
 
@@ -26,6 +26,8 @@ EXTERNDEF PI_INC_RECIP :FXPT
 EXTERNDEF PI_HALF :FXPT
 EXTERNDEF _dwWidth :DWORD
 EXTERNDEF _dwHeight :DWORD
+EXTERNDEF _bTransparent :BYTE
+EXTERNDEF _lpBytes :DWORD
 
 .DATA
 
@@ -78,12 +80,16 @@ PLAYER_COLLIDER EECS205RECT <?, ?, ?, ?>
 NukeAnimation Animation { 0, 3, SIZEOF EECS205BITMAP, OFFSET nuke_000 }
 FighterAnimation Animation { 0, 3, SIZEOF EECS205BITMAP, OFFSET fighter_000 }
 
+Fighter Character { , , , OFFSET fighter_001 }
+
 ;; other
 asteroid_rotation FXPT 0
 asteroid_collider EECS205RECT <?, ?, ?, ?>
 space_down BYTE 0
 
-rot_offset FXPT 0c900h
+rot_offset FXPT 0c900h ; approximately pi/2 to maximum possible accuracy
+
+Opacities BYTE 0ffh, 0dah, 09h, 0
 
 .CODE
 
@@ -183,8 +189,11 @@ CalculateCollider PROC USES eax edx edi bmpPtr:PTR EECS205BITMAP, colliderPtr:PT
   invoke FixedCos, edx
   mov cosa, eax
 
-  invoke FXPTDivide, _dwWidth, 20000h
-  invoke AXP, eax, sqrt2, eax
+  mov eax, _dwWidth
+  mov ebx, 2
+  cdq
+  div ebx
+  invoke AXP, eax, sqrt2, 0
   mov r_sqrt2, eax
 
   invoke AXP, r_sqrt2, cosa, 0
@@ -272,7 +281,7 @@ DrawPlayer PROC USES eax
       mov CURRENT_PLAYER_SPRITE, OFFSET fighter_000
 
   finish:
-    invoke RotateBlit, CURRENT_PLAYER_SPRITE, PLAYER_X, PLAYER_Y, PLAYER_ANGLE
+    invoke RotateBlit, CURRENT_PLAYER_SPRITE, PLAYER_X, PLAYER_Y, PLAYER_ANGLE, (Character PTR Fighter).opacity
     ret
 DrawPlayer ENDP
 
@@ -280,7 +289,7 @@ DrawAsteroid PROC USES ebx
   mov ebx, asteroid_rotation
   add ebx, delta_t
   mov asteroid_rotation, ebx
-  invoke RotateBlit, OFFSET asteroid_000, 319, 239, ebx
+  invoke RotateBlit, OFFSET asteroid_000, 319, 239, ebx, 255
   ret
 DrawAsteroid ENDP
 
@@ -380,6 +389,28 @@ GamePlay PROC USES eax ebx
 
   mov eax, m_y
   mov PLAYER_Y, eax
+
+  mov eax, (Character PTR Fighter).fade
+  mov ebx, (Character PTR Fighter).fademod
+  add eax, ebx
+  cmp ebx, 0
+  jg  end_up
+  jl  end_down
+  jmp set_opacity
+  end_up:
+    cmp eax, LENGTHOF Opacities
+    jl  set_opacity
+    mov (Character PTR Fighter).fademod, -1
+    jmp set_opacity
+  end_down:
+    cmp eax, 0
+    jg  set_opacity
+    mov (Character PTR Fighter).fademod, 1
+    jmp set_opacity
+  set_opacity:
+    mov (Character PTR Fighter).fade, eax
+    mov eax, [ OFFSET Opacities + eax ]
+    mov (Character PTR Fighter).opacity, eax
 
   invoke DrawPlayer
   invoke CalculatePlayerCollider

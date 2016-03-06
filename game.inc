@@ -59,3 +59,10 @@ Animation STRUCT
   frame_size DWORD ?
   frame_ptr DWORD ?
 Animation ENDS
+
+Character STRUCT
+  fade    DWORD 0
+  fademod DWORD 1
+  opacity DWORD 0ffh
+  bitmap  DWORD ? ; PTR EECS205BITMAP
+Character ENDS

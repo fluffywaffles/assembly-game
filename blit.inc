@@ -27,10 +27,6 @@ EECS205RECT TYPEDEF _EECS205RECT
 
 BasicBlit PROTO STDCALL ptrBitmap:PTR EECS205BITMAP, xcenter:DWORD, ycenter:DWORD
 
-RotateBlit PROTO STDCALL ptrBitmap:PTR EECS205BITMAP, xcenter:DWORD, ycenter:DWORD, angle:FXPT
+RotateBlit PROTO STDCALL ptrBitmap:PTR EECS205BITMAP, xcenter:DWORD, ycenter:DWORD, angle:FXPT, opacity:DWORD
 
 CheckIntersectRect PROTO STDCALL one:PTR EECS205RECT, two:PTR EECS205RECT
-
-
-
-
