@@ -49,22 +49,19 @@ delta_t FXPT 2000h ; AKA 1/16
 total_t FXPT 0
 
 ;; Player data
-PLAYER_X DWORD 100
-PLAYER_Y DWORD 100
-PLAYER_ANGLE FXPT 0
-
 PLAYER_VX DWORD 0
 PLAYER_VY DWORD 0
 
-CURRENT_PLAYER_SPRITE DWORD ? ; PTR EECS205BITMAP
-
-PLAYER_COLLIDER EECS205RECT <?, ?, ?, ?>
-
 ;; Animations
 NukeAnimation Animation { 0, 3, SIZEOF EECS205BITMAP,, OFFSET nuke_000 }
-FighterAnimation Animation { 0, 3, SIZEOF EECS205BITMAP,, OFFSET fighter_000 }
 
-Fighter Character { , , , , , 1, }
+;; Shaders
+FadeInOut Shader { 0, 2, 2, 0ffh, ?, ?, ?, ? }
+
+;; Fighter (Player)
+Fighter AnimatedCharacter { 0, 100, 100,,, }
+FighterCollider EECS205RECT { ?, ?, ?, ? }
+FighterAnimation Animation { 0, 3, SIZEOF EECS205BITMAP,, OFFSET fighter_000 }
 
 ;; other
 asteroid_rotation FXPT 0
@@ -194,7 +191,7 @@ CalculateCollider PROC USES eax edx edi bmpPtr:PTR EECS205BITMAP, colliderPtr:PT
 CalculateCollider ENDP
 
 CalculatePlayerCollider PROC
-  invoke CalculateCollider, CURRENT_PLAYER_SPRITE, OFFSET PLAYER_COLLIDER, PLAYER_X, PLAYER_Y, PLAYER_ANGLE
+  invoke CalculateCollider, Fighter.anim.frame_ptr, OFFSET Fighter.collider, Fighter.pos_x, Fighter.pos_y, Fighter.rotation
   ret
 CalculatePlayerCollider ENDP
 
@@ -205,10 +202,10 @@ CalculateAsteroidCollider ENDP
 
 UpdatePlayer PROC USES eax
   mov eax, m_x
-  mov PLAYER_X, eax
+  mov Fighter.pos_x, eax
 
   mov eax, m_y
-  mov PLAYER_Y, eax
+  mov Fighter.pos_y, eax
   ret
 UpdatePlayer ENDP
 
@@ -232,21 +229,22 @@ DrawPlayer PROC USES eax
     jl  less_thrust
 
     lotsa_thrust:
-      mov CURRENT_PLAYER_SPRITE, OFFSET fighter_001
+      mov Fighter.anim.frame_ptr, OFFSET fighter_001
       jmp finish
 
     less_thrust:
       cmp ebx, 1
       jl  no_thrust
 
-      mov CURRENT_PLAYER_SPRITE, OFFSET fighter_002
+      mov Fighter.anim.frame_ptr, OFFSET fighter_002
       jmp finish
 
     no_thrust:
-      mov CURRENT_PLAYER_SPRITE, OFFSET fighter_000
+      mov Fighter.anim.frame_ptr, OFFSET fighter_000
 
   finish:
-    invoke RotateBlit, CURRENT_PLAYER_SPRITE, PLAYER_X, PLAYER_Y, PLAYER_ANGLE, (Character PTR Fighter).opacity, 0
+    movzx ecx, Fighter.shader.colorMask
+    invoke RotateBlit, Fighter.anim.frame_ptr, Fighter.pos_x, Fighter.pos_y, Fighter.rotation, ecx, 0
     ret
 DrawPlayer ENDP
 
@@ -299,30 +297,30 @@ GamePlay PROC USES eax ebx
 
   ENDIF
 
-  mov eax, (Character PTR Fighter).fade
-  mov ebx, (Character PTR Fighter).fademod
-  mov edx, LENGTHOF opacities
-  dec edx
-  add eax, ebx
-  cmp ebx, 0
+  mov ah, Fighter.shader.cm_index
+  mov al, Fighter.shader.cm_delta
+  mov dh, Fighter.shader.cm_repeat
+  mov dl, LENGTHOF opacities
+  dec dl
+  add ah, al
+  cmp al, 0
   jg  end_up
   jl  end_down
   jmp set_opacity
   end_up:
-    cmp eax, edx
+    cmp ah, dl
     jl  set_opacity
-    neg ebx
-    mov (Character PTR Fighter).fademod, ebx
+    neg Fighter.shader.cm_delta
     jmp set_opacity
   end_down:
-    cmp eax, 0
+    cmp ah, 0
     jne set_opacity
-    neg ebx
-    mov (Character PTR Fighter).fademod, ebx
+    neg Fighter.shader.cm_delta
   set_opacity:
-    mov (Character PTR Fighter).fade, eax
-    mov eax, [ OFFSET opacities + eax ]
-    mov (Character PTR Fighter).opacity, eax
+    mov Fighter.shader.cm_index, ah
+    movzx ecx, ah
+    movzx ecx, opacities[ecx]
+    mov Fighter.shader.colorMask, cl
 
   invoke UpdatePlayer
   invoke DrawPlayer
@@ -331,7 +329,7 @@ GamePlay PROC USES eax ebx
   invoke DrawAsteroid
   invoke CalculateAsteroidCollider
 
-  invoke CheckIntersectRect, OFFSET PLAYER_COLLIDER, OFFSET asteroid_collider
+  invoke CheckIntersectRect, OFFSET Fighter.collider, OFFSET asteroid_collider
   cmp eax, 1
   jne no_collision
 
@@ -344,7 +342,10 @@ GamePlay PROC USES eax ebx
 GamePlay ENDP
 
 GameInit PROC
-  mov CURRENT_PLAYER_SPRITE, OFFSET fighter_000
+  mov Fighter.shader.cm_index, 0
+  mov Fighter.shader.cm_delta, 1
+  mov Fighter.shader.cm_repeat, 0
+  mov Fighter.shader.colorMask, 0ffh
 	ret
 GameInit ENDP
 

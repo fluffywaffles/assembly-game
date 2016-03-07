@@ -42,10 +42,6 @@ Character STRUCT
   pos_x    FXPT ?
   pos_y    FXPT ?
   collider_ptr DWORD ?
-  ;; to be deleted
-  fade     DWORD 0
-  fademod  DWORD 2
-  opacity  DWORD 0ffh
 Character ENDS
 
 Animation STRUCT
@@ -83,6 +79,7 @@ AnimatedCharacter STRUCT
   rotation FXPT ?
   pos_x    FXPT ?
   pos_y    FXPT ?
+  collider EECS205RECT <>
   anim     Animation <>
   shader   Shader <>
 AnimatedCharacter ENDS
