@@ -10,6 +10,7 @@
       .STACK 4096
       option casemap :none  ; case sensitive
 
+include common.inc
 include stars.inc
 include lines.inc
 include blit.inc
