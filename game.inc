@@ -48,9 +48,14 @@ Animation STRUCT
   current_frame BYTE ?
   frame_count   BYTE ?
   frame_size    BYTE ?
-                BYTE ? ;; padding
+  ALIGN DWORD
   frame_ptr     DWORD ?
 Animation ENDS
+
+;; Shader repeat modes
+ShaderRepeatWrap    = 0
+ShaderRepeatStop    = 1
+ShaderRepeatReverse = 2
 
 Shader STRUCT
   ; Shader repeat behaviours: 1 - no repeat, 2 - reverse, o/w - wrap (value = initial value)
@@ -59,6 +64,9 @@ Shader STRUCT
   cm_delta   BYTE ? ; mask index change speed
   cm_repeat  BYTE ? ; mask repeat behaviour
   colorMask  BYTE ? ; current mask value
+  cm_src_len BYTE ? ; length of colorMask source array
+  ALIGN DWORD
+  cm_src     DWORD ? ; ptr to colorMask source array
   ; compare colorShift against cs_bound to determine when to repeat
   cs_bound   BYTE ? ; shift boundary (at which to stop/repeat)
   cs_delta   BYTE ? ; shift change per frame
