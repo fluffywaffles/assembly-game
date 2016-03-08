@@ -629,6 +629,8 @@ GamePlay PROC USES eax ebx edx
 
   no_collision:
   skip_frame:
+    ; Check for pause at the end of the frame so that we pause on the most
+    ; recently updated screen instead of 1 frame behind
     invoke TogglePause
   	ret
 GamePlay ENDP
