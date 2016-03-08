@@ -35,10 +35,16 @@ ENDM
 
 InitializeAsteroidShaders MACRO lst
   %FOR aid, lst
-    IF aid LT 10
-      mov Asteroid&aid.anim.frame_ptr, OFFSET asteroid_003
+    IF aid LT 30
+      mov Asteroid&aid.anim.frame_ptr, OFFSET asteroid_005
     ELSEIF aid LT 60
+      mov Asteroid&aid.anim.frame_ptr, OFFSET asteroid_004
+    ELSEIF aid LT 90
       mov Asteroid&aid.anim.frame_ptr, OFFSET asteroid_001
+    ELSEIF aid LT 95
+      mov Asteroid&aid.anim.frame_ptr, OFFSET asteroid_003
+    ELSEIF aid LT 100
+      mov Asteroid&aid.anim.frame_ptr, OFFSET asteroid_000
     ELSE
       mov Asteroid&aid.anim.frame_ptr, OFFSET asteroid_002
     ENDIF
@@ -63,7 +69,13 @@ ENDM
 
 UpdateAsteroids MACRO lst
   %FOR aid, lst
-    invoke UpdateAsteroid, OFFSET Asteroid&aid
+    invoke Update, OFFSET Asteroid&aid
+  ENDM
+ENDM
+
+CalculateAsteroidsColliders MACRO lst
+  %FOR aid, lst
+    invoke CalculateCollider, OFFSET Asteroid&aid
   ENDM
 ENDM
 
@@ -93,4 +105,11 @@ UpdateAllAsteroids MACRO
   UpdateAsteroids AsteroidList2
   UpdateAsteroids AsteroidList3
   UpdateAsteroids AsteroidList4
+ENDM
+
+CalculateAllAsteroidsColliders MACRO
+  CalculateAsteroidsColliders AsteroidList
+  CalculateAsteroidsColliders AsteroidList2
+  CalculateAsteroidsColliders AsteroidList3
+  CalculateAsteroidsColliders AsteroidList4
 ENDM
