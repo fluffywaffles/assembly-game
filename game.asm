@@ -608,10 +608,7 @@ GamePlay PROC USES eax ebx edx
   invoke CalculateShaderColorMask, OFFSET Asteroid
   invoke CalculateShaderColorShift, OFFSET Asteroid
 
-  CalculateShaderAsteroids AsteroidList
-  CalculateShaderAsteroids AsteroidList2
-  CalculateShaderAsteroids AsteroidList3
-  CalculateShaderAsteroids AsteroidList4
+  CalculateAllAsteroidsShaders
 
   invoke UpdatePlayer
   invoke Draw, OFFSET Fighter
@@ -621,10 +618,7 @@ GamePlay PROC USES eax ebx edx
   invoke Draw, OFFSET Asteroid
   invoke CalculateCollider, OFFSET Asteroid
 
-  DrawAsteroids AsteroidList
-  DrawAsteroids AsteroidList2
-  DrawAsteroids AsteroidList3
-  DrawAsteroids AsteroidList4
+  DrawAllAsteroids
 
   invoke CheckIntersectRect, OFFSET Fighter.collider, OFFSET Asteroid.collider
   cmp eax, 1
@@ -647,23 +641,22 @@ GameInit PROC
   ;; begin looping background music
   invoke PlaySound, offset music, 0, SND_FILENAME OR SND_ASYNC OR SND_LOOP
 
+  ;; Load Player Shaders
   invoke CopyShaders, OFFSET Fighter.shader, OFFSET FadeInOut, OFFSET Rainbow
   ; disable fade for now
   mov Fighter.shader.cm_delta, 0
   ; also disable rainbow
   mov Fighter.shader.cs_delta, 0
 
-  ; no shader on Asteroid
+  ; No shaders on Asteroid
   invoke CopyShader, OFFSET Asteroid.shader, OFFSET BaseShader
 
   ;; Have to initialize the frame_ptr manually, for some reason
   mov Fighter.anim.frame_ptr, OFFSET fighter_000
   mov Asteroid.anim.frame_ptr, OFFSET asteroid_000
 
-  InitializeAsteroidShaders AsteroidList
-  InitializeAsteroidShaders AsteroidList2
-  InitializeAsteroidShaders AsteroidList3
-  InitializeAsteroidShaders AsteroidList4
+  ;; Initialize all our other Asteroids
+  InitializeAllAsteroids
 
 	ret
 GameInit ENDP

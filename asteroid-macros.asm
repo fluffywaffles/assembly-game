@@ -42,7 +42,7 @@ InitializeAsteroidShaders MACRO lst
   ENDM
 ENDM
 
-CalculateShaderAsteroids MACRO lst
+CalculateAsteroidsShaders MACRO lst
   %FOR aid, lst
     invoke CalculateShaderColorMask, OFFSET Asteroid&aid
     invoke CalculateShaderColorShift, OFFSET Asteroid&aid
@@ -53,4 +53,25 @@ DrawAsteroids MACRO lst
   %FOR aid, lst
     invoke Draw, OFFSET Asteroid&aid
   ENDM
+ENDM
+
+InitializeAllAsteroids MACRO
+  InitializeAsteroidShaders AsteroidList
+  InitializeAsteroidShaders AsteroidList2
+  InitializeAsteroidShaders AsteroidList3
+  InitializeAsteroidShaders AsteroidList4
+ENDM
+
+CalculateAllAsteroidsShaders MACRO
+  CalculateAsteroidsShaders AsteroidList
+  CalculateAsteroidsShaders AsteroidList2
+  CalculateAsteroidsShaders AsteroidList3
+  CalculateAsteroidsShaders AsteroidList4
+ENDM
+
+DrawAllAsteroids MACRO
+  DrawAsteroids AsteroidList
+  DrawAsteroids AsteroidList2
+  DrawAsteroids AsteroidList3
+  DrawAsteroids AsteroidList4
 ENDM
