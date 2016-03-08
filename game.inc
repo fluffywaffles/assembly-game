@@ -74,10 +74,28 @@ Shader STRUCT
   colorShift BYTE ? ; current color shift
 Shader ENDS
 
-AnimatedCharacter STRUCT
+Acceleration STRUCT
+  x FXPT ?
+  y FXPT ?
+  angular FXPT ?
+Acceleration ENDS
+
+Velocity STRUCT
+  x FXPT ?
+  y FXPT ?
+  angular FXPT ?
+Velocity ENDS
+
+Position STRUCT
+  x FXPT ?
+  y FXPT ?
   rotation FXPT ?
-  pos_x    FXPT ?
-  pos_y    FXPT ?
+Position ENDS
+
+AnimatedCharacter STRUCT
+  position Position <>
+  velocity Velocity <>
+  acceleration Acceleration <>
   collider EECS205RECT <>
   anim     Animation <>
   shader   Shader <>

@@ -11,6 +11,9 @@ include game.inc
 include input.inc
 include keys.inc
 
+DEBUG_X = 600
+DEBUG_Y = 400
+
 .DATA
 
 ;; Mouse data
@@ -61,15 +64,15 @@ UnpackMouse PROC USES eax ebx esi
   invoke PLOT, m_x, m_y, 01ch
 
   .if m_click
-    invoke PLOT, 10, 16, 01ch
+    invoke PLOT, DEBUG_X, DEBUG_Y + 6, 01ch
   .else
-    invoke PLOT, 10, 16, 0c0h
+    invoke PLOT, DEBUG_X, DEBUG_Y + 6, 0c0h
   .endif
 
   .if m_rclick
-    invoke PLOT, 12, 16, 01ch
+    invoke PLOT, DEBUG_X + 2, DEBUG_Y + 6, 01ch
   .else
-    invoke PLOT, 12, 16, 0c0h
+    invoke PLOT, DEBUG_X + 2, DEBUG_Y + 6, 0c0h
   .endif
 
   ENDIF
@@ -122,40 +125,40 @@ UnpackKeyPress PROC USES eax ebx
 
   IFDEF DEBUG
 
-  .if k_space
-    invoke PLOT, 10, 22, 01ch
-  .else
-    invoke PLOT, 10, 22, 0c0h
-  .endif
-
-  .if k_p
-    invoke PLOT, 10, 20, 01ch
-  .else
-    invoke PLOT, 10, 20, 0c0h
-  .endif
-
   .if k_up
-    invoke PLOT, 12, 10, 01ch
+    invoke PLOT, DEBUG_X + 2, DEBUG_Y, 01ch
   .else
-    invoke PLOT, 12, 10, 0c0h
+    invoke PLOT, DEBUG_X + 2, DEBUG_Y, 0c0h
   .endif
 
   .if k_left
-    invoke PLOT, 10, 12, 01ch
+    invoke PLOT, DEBUG_X, DEBUG_Y + 2, 01ch
   .else
-    invoke PLOT, 10, 12, 0c0h
+    invoke PLOT, DEBUG_X, DEBUG_Y + 2, 0c0h
   .endif
 
   .if k_right
-    invoke PLOT, 14, 12, 01ch
+    invoke PLOT, DEBUG_X + 4, DEBUG_Y + 2, 01ch
   .else
-    invoke PLOT, 14, 12, 0c0h
+    invoke PLOT, DEBUG_X + 4, DEBUG_Y + 2, 0c0h
   .endif
 
   .if k_down
-    invoke PLOT, 12, 12, 01ch
+    invoke PLOT, DEBUG_X + 2, DEBUG_Y + 2, 01ch
   .else
-    invoke PLOT, 12, 12, 0c0h
+    invoke PLOT, DEBUG_X + 2, DEBUG_Y + 2, 0c0h
+  .endif
+
+  .if k_space
+    invoke PLOT, DEBUG_X, DEBUG_Y + 12, 01ch
+  .else
+    invoke PLOT, DEBUG_X, DEBUG_Y + 12, 0c0h
+  .endif
+
+  .if k_p
+    invoke PLOT, DEBUG_X, DEBUG_Y + 10, 01ch
+  .else
+    invoke PLOT, DEBUG_X, DEBUG_Y + 10, 0c0h
   .endif
 
   ENDIF

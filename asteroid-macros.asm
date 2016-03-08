@@ -23,9 +23,13 @@ AsteroidList4 TEXTEQU @CatStr(<!<>, %N175, <,>, %N200, <!>>)
 ;-------------------------------------------------------------------------------
 CreateAsteroids MACRO list
   %FOR aid, list
-    Asteroid&aid AnimatedCharacter { &aid * 4096, 20 + &aid, 20 + &aid,,, }
-    AsteroidCollider&aid EECS205RECT { ?, ?, ?, ? }
-    AsteroidAnimation&aid Animation { 0, 1, SIZEOF EECS205BITMAP, OFFSET asteroid_000 }
+    Asteroid&aid AnimatedCharacter {\
+      { 20 + &aid, 20 + &aid, &aid * 4096 }, ; position
+      { 0, 0, 0 }, ; velocity
+      { 0, 0, 0 }, ; acceleration
+      ,            ; collider
+      { 0, 1, SIZEOF EECS205BITMAP, OFFSET asteroid_000 }\ ; animation
+    }
   ENDM
 ENDM
 
@@ -39,6 +43,8 @@ InitializeAsteroidShaders MACRO lst
       mov Asteroid&aid.anim.frame_ptr, OFFSET asteroid_002
     ENDIF
     invoke CopyShader, OFFSET Asteroid&aid.shader, OFFSET BaseShader
+
+    invoke Randomize, OFFSET Asteroid&aid
   ENDM
 ENDM
 
@@ -52,6 +58,12 @@ ENDM
 DrawAsteroids MACRO lst
   %FOR aid, lst
     invoke Draw, OFFSET Asteroid&aid
+  ENDM
+ENDM
+
+UpdateAsteroids MACRO lst
+  %FOR aid, lst
+    invoke UpdateAsteroid, OFFSET Asteroid&aid
   ENDM
 ENDM
 
@@ -74,4 +86,11 @@ DrawAllAsteroids MACRO
   DrawAsteroids AsteroidList2
   DrawAsteroids AsteroidList3
   DrawAsteroids AsteroidList4
+ENDM
+
+UpdateAllAsteroids MACRO
+  UpdateAsteroids AsteroidList
+  UpdateAsteroids AsteroidList2
+  UpdateAsteroids AsteroidList3
+  UpdateAsteroids AsteroidList4
 ENDM

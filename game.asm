@@ -116,17 +116,25 @@ Rainbow Shader   { ?, ?, ?, ?, ?, ?, 36, 1, ShaderRepeatReverse, 0 }
 ;-------------------------------------------------------------------------------
 ;; Fighter (Player)
 ;-------------------------------------------------------------------------------
-Fighter AnimatedCharacter { 0, 100, 350,,, }
-FighterCollider EECS205RECT { ?, ?, ?, ? }
-FighterAnimation Animation { 0, 3, SIZEOF EECS205BITMAP, OFFSET fighter_000 }
+Fighter AnimatedCharacter {\
+  <100, 350, 0>, ; position
+  <0, 0, 0>,     ; velocity
+  <0, 0, 0>,     ; acceleration
+  ,              ; collider
+  <0, 3, SIZEOF EECS205BITMAP, OFFSET fighter_000>\ ; animation
+}
 ;-------------------------------------------------------------------------------
 
 ;-------------------------------------------------------------------------------
 ;; Asteroid
 ;-------------------------------------------------------------------------------
-Asteroid AnimatedCharacter { 0, 319, 239,,, }
-AsteroidCollider EECS205RECT { ?, ?, ?, ? }
-AsteroidAnimation Animation { 0, 1, SIZEOF EECS205BITMAP, OFFSET asteroid_000 }
+Asteroid AnimatedCharacter {\
+  <319, 239, 0>,  ; position
+  <0, 0, 02000h>, ; velocity
+  <0, 0, 0>,      ; acceleration
+  ,               ; collider
+  <0, 1, SIZEOF EECS205BITMAP, OFFSET asteroid_000>\ ; animation
+}
 ;-------------------------------------------------------------------------------
 
 ;-------------------------------------------------------------------------------
@@ -211,20 +219,20 @@ CalculateCollider PROC USES eax edx character:PTR AnimatedCharacter
 
   invoke UnpackBitmap, [esi].anim.frame_ptr
 
-  invoke EdgesFromCenter, [esi].pos_x, _dwWidth
+  invoke EdgesFromCenter, [esi].position.x, _dwWidth
   mov [esi].collider.dwLeft, eax ; left
   mov [esi].collider.dwRight, edx ; right
   mov left, eax
   mov right, edx
 
-  invoke EdgesFromCenter, [esi].pos_y, _dwHeight
+  invoke EdgesFromCenter, [esi].position.y, _dwHeight
   mov [esi].collider.dwTop, eax  ; top
   mov [esi].collider.dwBottom, edx ; bottom
   mov top, eax
   mov bottom, edx
 
   ;; pffff rotating the collider, hah, that seemed like a good idea
-  mov edx, [esi].rotation
+  mov edx, [esi].position.rotation
   add edx, rot_offset
   neg edx
   invoke FixedSin, edx
@@ -255,7 +263,7 @@ CalculateCollider PROC USES eax edx character:PTR AnimatedCharacter
   invoke AXP, r_sqrt2, sina, 0
   mov ycomp, eax
 
-  mov eax, [esi].pos_x
+  mov eax, [esi].position.x
   sub eax, xcomp
   mov x_cos, eax
   add eax, xcomp
@@ -268,7 +276,7 @@ CalculateCollider PROC USES eax edx character:PTR AnimatedCharacter
   add eax, ycomp
   mov xpsin, eax
 
-  mov eax, [esi].pos_y
+  mov eax, [esi].position.y
   sub eax, xcomp
   mov y_cos, eax
   add eax, xcomp
@@ -312,31 +320,31 @@ UpdatePlayer PROC USES eax
 
   .if m_click == 1 || m_rclick == 1
     mov Fighter.anim.frame_ptr, OFFSET fighter_001
-    .if Fighter.rotation > 0 && Fighter.rotation < PI
-      add Fighter.pos_x, 10
+    .if Fighter.position.rotation > 0 && Fighter.position.rotation < PI
+      add Fighter.position.x, 10
     .else
-      sub Fighter.pos_x, 10
+      sub Fighter.position.x, 10
     .endif
   .else
     mov Fighter.anim.frame_ptr, OFFSET fighter_000
   .endif
 
   .if k_right == 1
-    add Fighter.rotation, 02000h
-    .if Fighter.rotation > TWO_PI
-      sub Fighter.rotation, TWO_PI
+    add Fighter.position.rotation, 02000h
+    .if Fighter.position.rotation > TWO_PI
+      sub Fighter.position.rotation, TWO_PI
     .endif
   .elseif k_left == 1
-    .if Fighter.rotation < 02000h
-      add Fighter.rotation, TWO_PI
+    .if Fighter.position.rotation < 02000h
+      add Fighter.position.rotation, TWO_PI
     .endif
-    sub Fighter.rotation, 02000h
+    sub Fighter.position.rotation, 02000h
   .endif
 
-  .if Fighter.pos_x < 22
-    mov Fighter.pos_x, 22
-  .elseif Fighter.pos_x > 639 - 32
-    mov Fighter.pos_x, 639 - 32
+  .if Fighter.position.x < 22
+    mov Fighter.position.x, 22
+  .elseif Fighter.position.x > 639 - 32
+    mov Fighter.position.x, 639 - 32
   .endif
 
   ret
@@ -344,12 +352,14 @@ UpdatePlayer ENDP
 
 ;===============================================================================
 ; Update that one Asteroid
-UpdateAsteroid PROC USES ebx ecx edx
+UpdateAsteroid PROC USES ebx ecx edx a:PTR AnimatedCharacter
 ; Update the fancy(er) Asteroid that rotates
 ;===============================================================================
-  mov ebx, Asteroid.rotation
-  add ebx, delta_t
-  mov Asteroid.rotation, ebx
+  ASSUME esi:PTR AnimatedCharacter
+  mov esi, a
+  mov ebx, [esi].position.rotation
+  add ebx, [esi].velocity.angular
+  mov [esi].position.rotation, ebx
 
   ret
 UpdateAsteroid ENDP
@@ -362,7 +372,7 @@ Draw PROC USES esi ecx edx character:PTR AnimatedCharacter
   mov esi, character
   movzx ecx, [esi].shader.colorMask
   movzx edx, [esi].shader.colorShift
-  invoke RotateBlit, [esi].anim.frame_ptr, [esi].pos_x, [esi].pos_y, [esi].rotation, ecx, edx
+  invoke RotateBlit, [esi].anim.frame_ptr, [esi].position.x, [esi].position.y, [esi].position.rotation, ecx, edx
   ret
 Draw ENDP
 
@@ -614,10 +624,11 @@ GamePlay PROC USES eax ebx edx
   invoke Draw, OFFSET Fighter
   invoke CalculateCollider, OFFSET Fighter
 
-  invoke UpdateAsteroid
+  invoke UpdateAsteroid, OFFSET Asteroid
   invoke Draw, OFFSET Asteroid
   invoke CalculateCollider, OFFSET Asteroid
 
+  UpdateAllAsteroids
   DrawAllAsteroids
 
   invoke CheckIntersectRect, OFFSET Fighter.collider, OFFSET Asteroid.collider
@@ -635,6 +646,29 @@ GamePlay PROC USES eax ebx edx
   	ret
 GamePlay ENDP
 
+Randomize PROC USES eax character:PTR AnimatedCharacter
+  mov esi, character
+
+  invoke nrandom, SCREEN_X_MAX
+  mov [esi].position.x, eax
+
+  invoke nrandom, SCREEN_Y_MAX - 180
+  mov [esi].position.y, eax
+
+  invoke nrandom, TWO_PI
+  mov [esi].position.rotation, eax
+
+  invoke nrandom, 01000h
+  mov [esi].velocity.angular, eax
+
+  invoke nrandom, 2
+  .if eax == 0
+    neg [esi].velocity.angular
+  .endif
+
+  ret
+Randomize ENDP
+
 ;===============================================================================
 ; Library Functions
 GameInit PROC
@@ -642,6 +676,10 @@ GameInit PROC
 ;===============================================================================
   ;; begin looping background music
   invoke PlaySound, offset music, 0, SND_FILENAME OR SND_ASYNC OR SND_LOOP
+
+  ;; seed RNG
+  rdtsc
+  invoke nseed, eax
 
   ;; Load Player Shaders
   invoke CopyShaders, OFFSET Fighter.shader, OFFSET FadeInOut, OFFSET Rainbow
@@ -652,10 +690,7 @@ GameInit PROC
 
   ; No shaders on Asteroid
   invoke CopyShader, OFFSET Asteroid.shader, OFFSET BaseShader
-
-  ;; Have to initialize the frame_ptr manually, for some reason
-  mov Fighter.anim.frame_ptr, OFFSET fighter_000
-  mov Asteroid.anim.frame_ptr, OFFSET asteroid_000
+  mov Asteroid.velocity.angular, 02000h
 
   ;; Initialize all our other Asteroids
   InitializeAllAsteroids
