@@ -17,14 +17,6 @@ include blit.inc
 include game.inc
 
 .DATA
-;;  These are some useful constants (fixed point values that correspond to important angles)
-PI_HALF = 102943           	    ;;  PI / 2
-PI =  205887	                  ;;  PI
-TWO_PI	= 411774                ;;  2 * PI
-PI_INC_RECIP =  5340353        	;;  256 / PI
-
-public PI_INC_RECIP
-public PI_HALF
 
 sign_flip BYTE ?
 

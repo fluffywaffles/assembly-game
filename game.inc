@@ -74,15 +74,6 @@ Shader STRUCT
   colorShift BYTE ? ; current color shift
 Shader ENDS
 
-;;; Interesting Shaders
-;Rainbow          Shader {  ?,  ?, ?,    ?, 0, -025h, 0, 0ffh }
-;;; opacities is the mask array for fades (3 possible speeds: 1 slow, 2, 4 fast)
-;opacities BYTE 4 DUP(0ffh), 4 DUP(0dah), 4 DUP(09h), 4 DUP(0)
-;FadeInOut        Shader {  0,  2, 2, 0ffh, ?,     ?, ?,    ? }
-;FadeOut          Shader {  0,  2, 1, 0ffh, ?,     ?, ?,    ? }
-;FadeIn           Shader { 15, -2, 1,   0h, ?,     ?, ?,    ? }
-;FadeInOutRainbow Shader {  0,  2, 2, 0ffh, 0, -025h, 0, 0ffh }
-
 AnimatedCharacter STRUCT
   rotation FXPT ?
   pos_x    FXPT ?

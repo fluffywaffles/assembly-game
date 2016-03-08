@@ -10,19 +10,54 @@
       .STACK 4096
       option casemap :none  ; case sensitive
 
-include common.inc
-include stars.inc
-include lines.inc
-include blit.inc
-include game.inc
-include input.inc
-include keys.inc
+;===============================================================================
+; Includes
+;===============================================================================
+;-------------------------------------------------------------------------------
+include \masm32\include\windows.inc ; wsprintf
+include \masm32\include\user32.inc  ; wsprintf
+include \masm32\include\winmm.inc   ; PlaySound
+include \masm32\include\masm32.inc  ; nseed, nrandom
+;-------------------------------------------------------------------------------
 
+;-------------------------------------------------------------------------------
+includelib \masm32\lib\user32.lib ; wsprintf
+includelib \masm32\lib\winmm.lib  ; PlaySound
+includelib \masm32\lib\masm32.lib ; nseed, nrandom
+;-------------------------------------------------------------------------------
+
+;-------------------------------------------------------------------------------
+;- common.inc: important global constants like DEBUG
+include common.inc
+;- stars.inc: AXP
+include stars.inc
+;- lines.inc: DrawLines, PI_*
+include lines.inc
+;- blit.inc: BasicBlit, RotateBlit
+include blit.inc
+;- game.inc: All of the custom game structs
+include game.inc
+;- input.inc: keyboard and mouse globals
+include input.inc
+;- keys.inc: virtual keycodes
+include keys.inc
+;- letters.inc: 3 font sizes for creating simple messages
 include letters.inc
+;-------------------------------------------------------------------------------
+
+;------------------------------------------------------------------------------
+; Asteroid Generation, Initialization, Shader Calculation, and Drawing
+include asteroid-macros.asm
+;-------------------------------------------------------------------------------
 
 .DATA
 
+;===============================================================================
+; Game-related Constants
+;===============================================================================
+;-------------------------------------------------------------------------------
 ;; Sprites
+;-------------------------------------------------------------------------------
 include space-sprites\asm\nuke_000.asm
 include space-sprites\asm\nuke_001.asm
 include space-sprites\asm\nuke_002.asm
@@ -37,48 +72,101 @@ include space-sprites\asm\asteroid_002.asm
 include space-sprites\asm\asteroid_003.asm
 include space-sprites\asm\asteroid_004.asm
 include space-sprites\asm\asteroid_005.asm
+;-------------------------------------------------------------------------------
 
-;; constant
-sqrt2 FXPT 00016a0ah ; approx. 1.41421508789
+;-------------------------------------------------------------------------------
+;; Beginning rotation offset; IMPORTANT for rotation of collider
+;-------------------------------------------------------------------------------
+rot_offset FXPT 0c900h ; approximately pi/2 to maximum possible accuracy
+;-------------------------------------------------------------------------------
 
+;-------------------------------------------------------------------------------
+;; Throttled Inputs
+;-------------------------------------------------------------------------------
 pause BYTE 0
 next_pause FXPT 0
+;-------------------------------------------------------------------------------
 
+;-------------------------------------------------------------------------------
 ;; Timing Data
+;-------------------------------------------------------------------------------
 delta_t FXPT 2000h ; AKA 1/16
 total_t FXPT 0
+;-------------------------------------------------------------------------------
 
-;; Player data
-PLAYER_VX DWORD 0
-PLAYER_VY DWORD 0
+;-------------------------------------------------------------------------------
+;; Ticks
+;-------------------------------------------------------------------------------
+Ticks DWORD 0
+;-------------------------------------------------------------------------------
 
-;; Animations
-NukeAnimation Animation { 0, 3, SIZEOF EECS205BITMAP, }
-
-;; Shaders
+;-------------------------------------------------------------------------------
+;; Shaders (These are just examples)
+;-------------------------------------------------------------------------------
+;; "Base" Shader                              ; $ = current addr, no source array
+BaseShader Shader { 0, 0, ShaderRepeatStop, 0ffh, 0, $, 0, 0, ShaderRepeatStop, 0 }
+;; Shader source array for FadeInOut
 opacities BYTE 4 DUP(0ffh), 4 DUP(0dah), 4 DUP(09h), 4 DUP(0)
-FadeInOut Shader { 0, 2, 2, 0ffh, LENGTHOF opacities, OFFSET opacities, ?, ?, ?, ? }
-Rainbow Shader   { ?, ?, ?, ?, ?, ?, 0, -025h, 0ffh, 0ffh }
+;; ColorMask shader
+FadeInOut Shader { 0, 2, ShaderRepeatReverse, 0ffh, LENGTHOF opacities, OFFSET opacities, ?, ?, ?, ? }
+;; ColorShift shader
+Rainbow Shader   { ?, ?, ?, ?, ?, ?, 36, 1, ShaderRepeatReverse, 0 }
+;-------------------------------------------------------------------------------
 
+;-------------------------------------------------------------------------------
 ;; Fighter (Player)
-Fighter AnimatedCharacter { 0, 100, 100,,, }
+;-------------------------------------------------------------------------------
+Fighter AnimatedCharacter { 0, 100, 350,,, }
 FighterCollider EECS205RECT { ?, ?, ?, ? }
 FighterAnimation Animation { 0, 3, SIZEOF EECS205BITMAP, OFFSET fighter_000 }
+;-------------------------------------------------------------------------------
 
+;-------------------------------------------------------------------------------
 ;; Asteroid
+;-------------------------------------------------------------------------------
 Asteroid AnimatedCharacter { 0, 319, 239,,, }
 AsteroidCollider EECS205RECT { ?, ?, ?, ? }
 AsteroidAnimation Animation { 0, 1, SIZEOF EECS205BITMAP, OFFSET asteroid_000 }
+;-------------------------------------------------------------------------------
 
-rot_offset FXPT 0c900h ; approximately pi/2 to maximum possible accuracy
+;-------------------------------------------------------------------------------
+;; Asteroid creation
+;-------------------------------------------------------------------------------
+CreateAsteroids AsteroidList
+CreateAsteroids AsteroidList2
+CreateAsteroids AsteroidList3
+CreateAsteroids AsteroidList4
 
+;-------------------------------------------------------------------------------
+;; Strings and Words and such
+;-------------------------------------------------------------------------------
 wCollide DWORD l7c, l7o, l7l,
                l7l, l7i, l7d,
                l7e, l7exclamation
 
-.CODE
+scoreFmtStr BYTE "SCORE! %d", 0
+scoreStr    BYTE 256 DUP(0)
 
+;-------------------------------------------------------------------------------
+;; Scoring Data
+;-------------------------------------------------------------------------------
+score               DWORD 0
+last_score_ticks    DWORD 0
+score_tick_interval DWORD 10
+
+;-------------------------------------------------------------------------------
+;; Background Music
+;-------------------------------------------------------------------------------
+music BYTE "music.wav", 0
+
+.CODE
+;===============================================================================
+;; The game begins
+;===============================================================================
+; Utility
 cls PROC
+; Clears the screen (sets all pixels to black)
+;===============================================================================
   mov esi, ScreenBitsPtr
   mov edx, SCREEN_SIZE
   xor eax, eax
@@ -96,15 +184,24 @@ cls PROC
     ret
 cls ENDP
 
+;===============================================================================
+; Timing
 UpdateTime PROC USES eax
+; Updates the total_t timer accumulator by adding delta_t
+;===============================================================================
   mov eax, total_t
   add eax, delta_t
   mov total_t, eax
   ret
 UpdateTime ENDP
 
+;===============================================================================
+; Collision Detection
 CalculateCollider PROC USES eax edx character:PTR AnimatedCharacter
+; Performs calculations to accurately define colliders for AnimatedCharacters
+;===============================================================================
   LOCAL left:DWORD, top:DWORD, right:DWORD, bottom:DWORD
+  ;; rotation locals
   LOCAL r_sqrt2:FXPT, sina:FXPT, cosa:FXPT, xcomp:FXPT, ycomp:FXPT
   LOCAL x_cos:FXPT, x_sin:FXPT, y_cos:FXPT, y_sin:FXPT, xpcos:FXPT, xpsin:FXPT, ypcos:FXPT, ypsin:FXPT
 
@@ -126,6 +223,7 @@ CalculateCollider PROC USES eax edx character:PTR AnimatedCharacter
   mov top, eax
   mov bottom, edx
 
+  ;; pffff rotating the collider, hah, that seemed like a good idea
   mov edx, [esi].rotation
   add edx, rot_offset
   neg edx
@@ -149,7 +247,7 @@ CalculateCollider PROC USES eax edx character:PTR AnimatedCharacter
   inc eax
   continue_comp:
 
-  invoke AXP, eax, sqrt2, 0
+  invoke AXP, eax, SQRT2, 0
   mov r_sqrt2, eax
 
   invoke AXP, r_sqrt2, cosa, 0
@@ -198,66 +296,81 @@ CalculateCollider PROC USES eax edx character:PTR AnimatedCharacter
   ret
 CalculateCollider ENDP
 
+;===============================================================================
+; Update Player
 UpdatePlayer PROC USES eax
-  mov eax, m_x
-  mov Fighter.pos_x, eax
+; Update the struct containing the Player's data based on input
+;===============================================================================
+  .if k_down == 1
+    .if Fighter.shader.cm_delta != 0
+      mov Fighter.shader.cm_delta, 0
+    .else
+      mov Fighter.shader.cm_delta, 2
+    .endif
+    mov Fighter.shader.cm_index, 0
+  .endif
 
-  mov eax, m_y
-  mov Fighter.pos_y, eax
+  .if m_click == 1 || m_rclick == 1
+    mov Fighter.anim.frame_ptr, OFFSET fighter_001
+    .if Fighter.rotation > 0 && Fighter.rotation < PI
+      add Fighter.pos_x, 10
+    .else
+      sub Fighter.pos_x, 10
+    .endif
+  .else
+    mov Fighter.anim.frame_ptr, OFFSET fighter_000
+  .endif
+
+  .if k_right == 1
+    add Fighter.rotation, 02000h
+    .if Fighter.rotation > TWO_PI
+      sub Fighter.rotation, TWO_PI
+    .endif
+  .elseif k_left == 1
+    .if Fighter.rotation < 02000h
+      add Fighter.rotation, TWO_PI
+    .endif
+    sub Fighter.rotation, 02000h
+  .endif
+
+  .if Fighter.pos_x < 22
+    mov Fighter.pos_x, 22
+  .elseif Fighter.pos_x > 639 - 32
+    mov Fighter.pos_x, 639 - 32
+  .endif
+
   ret
 UpdatePlayer ENDP
 
-DrawPlayer PROC USES eax ebx ecx edx
-  xor ebx, ebx
-
-  click:
-    movzx eax, m_click
-    cmp eax, 1
-    jne  space
-    inc ebx
-
-  space:
-    mov eax, KeyPress
-    cmp eax, VK_SPACE
-    jne draw
-    inc ebx
-
-  draw:
-    cmp ebx, 2
-    jl  less_thrust
-
-    lotsa_thrust:
-      mov Fighter.anim.frame_ptr, OFFSET fighter_001
-      jmp finish
-
-    less_thrust:
-      cmp ebx, 1
-      jl  no_thrust
-
-      mov Fighter.anim.frame_ptr, OFFSET fighter_002
-      jmp finish
-
-    no_thrust:
-      mov Fighter.anim.frame_ptr, OFFSET fighter_000
-
-  finish:
-    movzx ecx, Fighter.shader.colorMask
-    movzx edx, Fighter.shader.colorShift
-    invoke RotateBlit, Fighter.anim.frame_ptr, Fighter.pos_x, Fighter.pos_y, Fighter.rotation, ecx, edx
-    ret
-DrawPlayer ENDP
-
-DrawAsteroid PROC USES ebx ecx edx
+;===============================================================================
+; Update that one Asteroid
+UpdateAsteroid PROC USES ebx ecx edx
+; Update the fancy(er) Asteroid that rotates
+;===============================================================================
   mov ebx, Asteroid.rotation
   add ebx, delta_t
   mov Asteroid.rotation, ebx
-  movzx ecx, Asteroid.shader.colorMask
-  movzx edx, Asteroid.shader.colorShift
-  invoke RotateBlit, Asteroid.anim.frame_ptr, Asteroid.pos_x, Asteroid.pos_y, Asteroid.rotation, ecx, edx
-  ret
-DrawAsteroid ENDP
 
+  ret
+UpdateAsteroid ENDP
+
+;===============================================================================
+; Drawing to Screen
+Draw PROC USES esi ecx edx character:PTR AnimatedCharacter
+; Draws an AnimatedCharacter to screen
+;===============================================================================
+  mov esi, character
+  movzx ecx, [esi].shader.colorMask
+  movzx edx, [esi].shader.colorShift
+  invoke RotateBlit, [esi].anim.frame_ptr, [esi].pos_x, [esi].pos_y, [esi].rotation, ecx, edx
+  ret
+Draw ENDP
+
+;===============================================================================
+; Pause functionality
 TogglePause PROC USES eax
+; Toggle whether the game is paused based on player input
+;===============================================================================
   mov eax, total_t
   cmp eax, next_pause
   jl  _end
@@ -276,12 +389,69 @@ TogglePause PROC USES eax
     ret
 TogglePause ENDP
 
+;===============================================================================
+; Draw Text to Screen
 DrawCollideWarning PROC
+; Draws 'COLLIDE!' to screen at position 280, 200
+;===============================================================================
   invoke DrawWord, OFFSET wCollide, LENGTHOF wCollide, 280, 200, 0c0h
   ret
 DrawCollideWarning ENDP
 
+;===============================================================================
+; Copy Shader
+CopyShader PROC USES eax esi edi destShader:PTR Shader, sourceShader:PTR Shader
+; Set an AnimatedCharacter's Shader to a predefined Shader's values
+;===============================================================================
+  ASSUME esi:PTR Shader
+  ASSUME edi:PTR Shader
+
+  mov esi, sourceShader
+  mov edi, destShader
+
+  FOR offset, <0, 1, 2, 3, 4, 12, 13, 14, 15>
+    mov al, [esi + offset]
+    mov BYTE PTR [edi + offset], al
+  ENDM
+
+  mov eax, [esi].cm_src
+  mov [edi].cm_src, eax
+
+  ret
+CopyShader ENDP
+
+;===============================================================================
+; Copy Mask and Shift Shaders
+CopyShaders PROC USES eax esi edi destShader:PTR Shader, maskShader:PTR Shader, shiftShader:PTR Shader
+; Set an Animatedcharacter's Shader to a combination of two predefined Shaders
+;===============================================================================
+  ASSUME esi:PTR Shader
+  ASSUME edi:PTR Shader
+  mov edi, destShader
+
+  mov esi, maskShader
+  FOR offset, <0, 1, 2, 3, 4>
+    mov al, [esi + offset]
+    mov BYTE PTR [edi + offset], al
+  ENDM
+
+  mov eax, [esi].cm_src
+  mov [edi].cm_src, eax
+
+  mov esi, shiftShader
+  FOR offset, <12, 13, 14, 15>
+    mov al, [esi + offset]
+    mov BYTE PTR [edi + offset], al
+  ENDM
+
+  ret
+CopyShaders ENDP
+
+;===============================================================================
+; Shader Calculations
 CalculateShaderColorMask PROC USES esi edi eax ecx edx character:PTR AnimatedCharacter
+; Calculates the current Shader ColorMask for an AnimatedCharacter
+;===============================================================================
   ASSUME esi:PTR AnimatedCharacter
   mov esi, character
 
@@ -290,6 +460,15 @@ CalculateShaderColorMask PROC USES esi edi eax ecx edx character:PTR AnimatedCha
   mov al, [esi].shader.cm_delta
   mov dh, [esi].shader.cm_repeat
   mov dl, [esi].shader.cm_src_len
+
+  .if dl == 0
+    ; if there are no source values, then skip
+    jmp skip_calculation
+  .elseif dl == 1
+    ; if there's only one source value, skip the repeat logic
+    jmp set_opacity
+  .endif
+
   dec dl
   add ah, al
   cmp al, 0
@@ -329,10 +508,15 @@ CalculateShaderColorMask PROC USES esi edi eax ecx edx character:PTR AnimatedCha
     movzx ecx, BYTE PTR [edi + ecx]
     mov [esi].shader.colorMask, cl
 
-  ret
+  skip_calculation:
+    ret
 CalculateShaderColorMask ENDP
 
+;===============================================================================
+; Shader Calculations
 CalculateShaderColorShift PROC USES eax ecx edx esi character:PTR AnimatedCharacter
+; Calculates the current Shader ColorShift for an AnimatedCharacter
+;===============================================================================
   mov esi, character
   mov ah, [esi].shader.colorShift
   mov al, [esi].shader.cs_delta
@@ -340,7 +524,7 @@ CalculateShaderColorShift PROC USES eax ecx edx esi character:PTR AnimatedCharac
   mov dl, [esi].shader.cs_bound
   add ah, al
   cmp ah, dl
-  jle repeat_behaviour
+  je  repeat_behaviour
   jmp set_colorshift
   repeat_behaviour:
     .if dh == ShaderRepeatStop
@@ -349,23 +533,65 @@ CalculateShaderColorShift PROC USES eax ecx edx esi character:PTR AnimatedCharac
       mov [esi].shader.cs_delta, 0
     .elseif dh == ShaderRepeatReverse
       neg [esi].shader.cs_delta
+      sub dl, 36
+      neg dl
+      mov [esi].shader.cs_bound, dl
     .else
       mov ah, dh
     .endif
   set_colorshift:
     mov [esi].shader.colorShift, ah
-
   ret
 CalculateShaderColorShift ENDP
 
+;===============================================================================
+; Game Ticks
+UpdateTicks PROC USES eax
+; Updates the games 'Ticks' to keep track of frames rendered since start
+;===============================================================================
+  mov eax, Ticks
+  inc eax
+  mov Ticks, eax
+  ret
+UpdateTicks ENDP
+
+;===============================================================================
+; Scoring
+UpdateScore PROC
+; Updates the score and draws it to screen
+;===============================================================================
+  mov eax, Ticks
+  sub eax, last_score_ticks
+  .if eax > score_tick_interval
+    mov eax, Ticks
+    mov last_score_ticks, eax
+    inc score
+  .endif
+  rdtsc
+  push score
+  push offset scoreFmtStr
+  push offset scoreStr
+  call wsprintf
+  add esp, 12
+  invoke DrawStr, OFFSET scoreStr, 300, 400, 0c3h
+  ret
+UpdateScore ENDP
+
+;===============================================================================
+; Library Function
 GamePlay PROC USES eax ebx edx
+; Called by the game library on every frame
+;===============================================================================
   invoke UpdateTime
+  invoke UpdateTicks
 
   .if pause != 0
     jmp skip_frame
   .endif
 
   invoke cls
+
+  invoke UpdateScore
 
   invoke UnpackMouse
   invoke UnpackKeyPress
@@ -382,18 +608,30 @@ GamePlay PROC USES eax ebx edx
   invoke CalculateShaderColorMask, OFFSET Asteroid
   invoke CalculateShaderColorShift, OFFSET Asteroid
 
+  CalculateShaderAsteroids AsteroidList
+  CalculateShaderAsteroids AsteroidList2
+  CalculateShaderAsteroids AsteroidList3
+  CalculateShaderAsteroids AsteroidList4
+
   invoke UpdatePlayer
-  invoke DrawPlayer
+  invoke Draw, OFFSET Fighter
   invoke CalculateCollider, OFFSET Fighter
 
-  invoke DrawAsteroid
+  invoke UpdateAsteroid
+  invoke Draw, OFFSET Asteroid
   invoke CalculateCollider, OFFSET Asteroid
+
+  DrawAsteroids AsteroidList
+  DrawAsteroids AsteroidList2
+  DrawAsteroids AsteroidList3
+  DrawAsteroids AsteroidList4
 
   invoke CheckIntersectRect, OFFSET Fighter.collider, OFFSET Asteroid.collider
   cmp eax, 1
   jne no_collision
 
-  invoke DrawCollideWarning
+  sub score, 50
+  invoke UpdateScore
 
   no_collision:
   skip_frame:
@@ -401,19 +639,21 @@ GamePlay PROC USES eax ebx edx
   	ret
 GamePlay ENDP
 
+;===============================================================================
+; Library Functions
 GameInit PROC
-  mov Fighter.shader.cm_index, 0
-  mov Fighter.shader.cm_delta, 1
-  mov Fighter.shader.cm_repeat, ShaderRepeatReverse
-  mov Fighter.shader.colorMask, 0ffh
-  mov Fighter.shader.cm_src_len, LENGTHOF opacities
-  mov Fighter.shader.cm_src, OFFSET opacities
+; Called by the game library before the first frame
+;===============================================================================
+  ;; begin looping background music
+  invoke PlaySound, offset music, 0, SND_FILENAME OR SND_ASYNC OR SND_LOOP
 
-  mov Fighter.shader.cs_bound, 0h
-  mov Fighter.shader.cs_delta, 01h
-  mov Fighter.shader.cs_repeat, 02h
-  mov Fighter.shader.colorShift, 0h
+  invoke CopyShaders, OFFSET Fighter.shader, OFFSET FadeInOut, OFFSET Rainbow
+  ; disable fade for now
+  mov Fighter.shader.cm_delta, 0
+  ; also disable rainbow
+  mov Fighter.shader.cs_delta, 0
 
+  ;; set up Asteroid colormask
   mov Asteroid.shader.cm_index, 0
   mov Asteroid.shader.cm_delta, 0
   mov Asteroid.shader.cm_repeat, ShaderRepeatReverse
@@ -421,14 +661,22 @@ GameInit PROC
   mov Asteroid.shader.cm_src_len, LENGTHOF opacities
   mov Asteroid.shader.cm_src, OFFSET opacities
 
+  ;;; set up Asteroid colorshift
   mov Asteroid.shader.cs_bound, 0h
   mov Asteroid.shader.cs_delta, 0h
-  mov Asteroid.shader.cs_repeat, 02h
+  mov Asteroid.shader.cs_repeat, ShaderRepeatReverse
   mov Asteroid.shader.colorShift, 0h
 
-  ;; Have to initialize the frame_ptr manually
+  invoke CopyShader, OFFSET Asteroid.shader, OFFSET BaseShader
+
+  ;; Have to initialize the frame_ptr manually, for some reason
   mov Fighter.anim.frame_ptr, OFFSET fighter_000
   mov Asteroid.anim.frame_ptr, OFFSET asteroid_000
+
+  InitializeAsteroidShaders AsteroidList
+  InitializeAsteroidShaders AsteroidList2
+  InitializeAsteroidShaders AsteroidList3
+  InitializeAsteroidShaders AsteroidList4
 
 	ret
 GameInit ENDP
