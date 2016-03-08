@@ -207,7 +207,7 @@ UpdatePlayer PROC USES eax
   ret
 UpdatePlayer ENDP
 
-DrawPlayer PROC USES eax
+DrawPlayer PROC USES eax ebx ecx edx
   xor ebx, ebx
 
   click:
@@ -247,11 +247,13 @@ DrawPlayer PROC USES eax
     ret
 DrawPlayer ENDP
 
-DrawAsteroid PROC USES ebx
+DrawAsteroid PROC USES ebx ecx edx
   mov ebx, Asteroid.rotation
   add ebx, delta_t
   mov Asteroid.rotation, ebx
-  invoke RotateBlit, Asteroid.anim.frame_ptr, Asteroid.pos_x, Asteroid.pos_y, Asteroid.rotation, 255, 0
+  movzx ecx, Asteroid.shader.colorMask
+  movzx edx, Asteroid.shader.colorShift
+  invoke RotateBlit, Asteroid.anim.frame_ptr, Asteroid.pos_x, Asteroid.pos_y, Asteroid.rotation, ecx, edx
   ret
 DrawAsteroid ENDP
 
@@ -279,6 +281,83 @@ DrawCollideWarning PROC
   ret
 DrawCollideWarning ENDP
 
+CalculateShaderColorMask PROC USES esi edi eax ecx edx character:PTR AnimatedCharacter
+  ASSUME esi:PTR AnimatedCharacter
+  mov esi, character
+
+  mov edi, [esi].shader.cm_src
+  mov ah, [esi].shader.cm_index
+  mov al, [esi].shader.cm_delta
+  mov dh, [esi].shader.cm_repeat
+  mov dl, [esi].shader.cm_src_len
+  dec dl
+  add ah, al
+  cmp al, 0
+  jg  end_up
+  jl  end_down
+  jmp set_opacity
+  end_up:
+    cmp ah, dl
+    jl  set_opacity
+    .if [esi].shader.cm_repeat == 2
+      ; reverse
+      neg [esi].shader.cm_delta
+    .elseif [esi].shader.cm_repeat == 1
+      ; stop
+      mov [esi].shader.cm_delta, 0
+    .else
+      ; wrap back to repeat position
+      mov ah, [esi].shader.cm_repeat
+    .endif
+    jmp set_opacity
+  end_down:
+    cmp ah, 0
+    jne set_opacity
+    .if [esi].shader.cm_repeat == 2
+      ; reverse
+      neg [esi].shader.cm_delta
+    .elseif [esi].shader.cm_repeat == 1
+      ; stop
+      mov [esi].shader.cm_delta, 0
+    .else
+      ; wrap back to repeat position
+      mov ah, [esi].shader.cm_repeat
+    .endif
+  set_opacity:
+    mov [esi].shader.cm_index, ah
+    movzx ecx, ah
+    movzx ecx, BYTE PTR [edi + ecx]
+    mov [esi].shader.colorMask, cl
+
+  ret
+CalculateShaderColorMask ENDP
+
+CalculateShaderColorShift PROC USES eax ecx edx esi character:PTR AnimatedCharacter
+  mov esi, character
+  mov ah, [esi].shader.colorShift
+  mov al, [esi].shader.cs_delta
+  mov dh, [esi].shader.cs_repeat
+  mov dl, [esi].shader.cs_bound
+  add ah, al
+  cmp ah, dl
+  jle repeat_behaviour
+  jmp set_colorshift
+  repeat_behaviour:
+    .if dh == ShaderRepeatStop
+      mov ah, 0
+      mov [esi].shader.colorShift, 0
+      mov [esi].shader.cs_delta, 0
+    .elseif dh == ShaderRepeatReverse
+      neg [esi].shader.cs_delta
+    .else
+      mov ah, dh
+    .endif
+  set_colorshift:
+    mov [esi].shader.colorShift, ah
+
+  ret
+CalculateShaderColorShift ENDP
+
 GamePlay PROC USES eax ebx edx
   invoke UpdateTime
 
@@ -297,70 +376,11 @@ GamePlay PROC USES eax ebx edx
 
   ENDIF
 
-  mov esi, Fighter.shader.cm_src
-  mov ah, Fighter.shader.cm_index
-  mov al, Fighter.shader.cm_delta
-  mov dh, Fighter.shader.cm_repeat
-  mov dl, Fighter.shader.cm_src_len
-  dec dl
-  add ah, al
-  cmp al, 0
-  jg  end_up
-  jl  end_down
-  jmp set_opacity
-  end_up:
-    cmp ah, dl
-    jl  set_opacity
-    .if Fighter.shader.cm_repeat == 2
-      ; reverse
-      neg Fighter.shader.cm_delta
-    .elseif Fighter.shader.cm_repeat == 1
-      ; stop
-      mov Fighter.shader.cm_delta, 0
-    .else
-      ; wrap back to repeat position
-      mov ah, Fighter.shader.cm_repeat
-    .endif
-    jmp set_opacity
-  end_down:
-    cmp ah, 0
-    jne set_opacity
-    .if Fighter.shader.cm_repeat == 2
-      ; reverse
-      neg Fighter.shader.cm_delta
-    .elseif Fighter.shader.cm_repeat == 1
-      ; stop
-      mov Fighter.shader.cm_delta, 0
-    .else
-      ; wrap back to repeat position
-      mov ah, Fighter.shader.cm_repeat
-    .endif
-  set_opacity:
-    mov Fighter.shader.cm_index, ah
-    movzx ecx, ah
-    movzx ecx, BYTE PTR [esi + ecx]
-    mov Fighter.shader.colorMask, cl
+  invoke CalculateShaderColorMask, OFFSET Fighter
+  invoke CalculateShaderColorShift, OFFSET Fighter
 
-  mov ah, Fighter.shader.colorShift
-  mov al, Fighter.shader.cs_delta
-  mov dh, Fighter.shader.cs_repeat
-  mov dl, Fighter.shader.cs_bound
-  add ah, al
-  cmp ah, dl
-  jle repeat_behaviour
-  jmp set_colorshift
-  repeat_behaviour:
-    .if dh == ShaderRepeatStop
-      mov ah, 0
-      mov Fighter.shader.colorShift, 0
-      mov Fighter.shader.cs_delta, 0
-    .elseif dh == ShaderRepeatReverse
-      neg Fighter.shader.cs_delta
-    .else
-      mov ah, dh
-    .endif
-  set_colorshift:
-    mov Fighter.shader.colorShift, ah
+  invoke CalculateShaderColorMask, OFFSET Asteroid
+  invoke CalculateShaderColorShift, OFFSET Asteroid
 
   invoke UpdatePlayer
   invoke DrawPlayer
@@ -383,7 +403,7 @@ GamePlay ENDP
 
 GameInit PROC
   mov Fighter.shader.cm_index, 0
-  mov Fighter.shader.cm_delta, 0
+  mov Fighter.shader.cm_delta, 1
   mov Fighter.shader.cm_repeat, ShaderRepeatReverse
   mov Fighter.shader.colorMask, 0ffh
   mov Fighter.shader.cm_src_len, LENGTHOF opacities
@@ -393,6 +413,18 @@ GameInit PROC
   mov Fighter.shader.cs_delta, 01h
   mov Fighter.shader.cs_repeat, 02h
   mov Fighter.shader.colorShift, 0h
+
+  mov Asteroid.shader.cm_index, 0
+  mov Asteroid.shader.cm_delta, 0
+  mov Asteroid.shader.cm_repeat, ShaderRepeatReverse
+  mov Asteroid.shader.colorMask, 0ffh
+  mov Asteroid.shader.cm_src_len, LENGTHOF opacities
+  mov Asteroid.shader.cm_src, OFFSET opacities
+
+  mov Asteroid.shader.cs_bound, 0h
+  mov Asteroid.shader.cs_delta, 0h
+  mov Asteroid.shader.cs_repeat, 02h
+  mov Asteroid.shader.colorShift, 0h
 
   ;; Have to initialize the frame_ptr manually
   mov Fighter.anim.frame_ptr, OFFSET fighter_000
