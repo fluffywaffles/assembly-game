@@ -58,13 +58,14 @@ NukeAnimation Animation { 0, 3, SIZEOF EECS205BITMAP, }
 ;; Shaders
 opacities BYTE 4 DUP(0ffh), 4 DUP(0dah), 4 DUP(09h), 4 DUP(0)
 FadeInOut Shader { 0, 2, 2, 0ffh, LENGTHOF opacities, OFFSET opacities, ?, ?, ?, ? }
+Rainbow Shader   { ?, ?, ?, ?, ?, ?, 0, -025h, 0ffh, 0ffh }
 
 ;; Fighter (Player)
 Fighter AnimatedCharacter { 0, 100, 100,,, }
 FighterCollider EECS205RECT { ?, ?, ?, ? }
 FighterAnimation Animation { 0, 3, SIZEOF EECS205BITMAP, OFFSET fighter_000 }
 
-;; other
+;; Asteroid
 Asteroid AnimatedCharacter { 0, 319, 239,,, }
 AsteroidCollider EECS205RECT { ?, ?, ?, ? }
 AsteroidAnimation Animation { 0, 1, SIZEOF EECS205BITMAP, OFFSET asteroid_000 }
@@ -187,6 +188,11 @@ CalculateCollider PROC USES eax edx character:PTR AnimatedCharacter
   invoke DrawLine, x_sin, y_cos, x_cos, ypsin, 03h
   invoke DrawLine, xpsin, ypcos, xpcos, y_sin, 03h
   invoke DrawLine, xpsin, ypcos, x_cos, ypsin, 03h
+
+  invoke DrawLine, [esi].collider.dwLeft, [esi].collider.dwTop, [esi].collider.dwRight, [esi].collider.dwTop, 01ch
+  invoke DrawLine, [esi].collider.dwLeft, [esi].collider.dwBottom, [esi].collider.dwRight, [esi].collider.dwBottom, 01ch
+  invoke DrawLine, [esi].collider.dwLeft, [esi].collider.dwTop, [esi].collider.dwLeft, [esi].collider.dwBottom, 01ch
+  invoke DrawLine, [esi].collider.dwRight, [esi].collider.dwTop, [esi].collider.dwRight, [esi].collider.dwBottom, 01ch
   ENDIF
 
   ret
@@ -236,7 +242,8 @@ DrawPlayer PROC USES eax
 
   finish:
     movzx ecx, Fighter.shader.colorMask
-    invoke RotateBlit, Fighter.anim.frame_ptr, Fighter.pos_x, Fighter.pos_y, Fighter.rotation, ecx, 0
+    movzx edx, Fighter.shader.colorShift
+    invoke RotateBlit, Fighter.anim.frame_ptr, Fighter.pos_x, Fighter.pos_y, Fighter.rotation, ecx, edx
     ret
 DrawPlayer ENDP
 
@@ -247,10 +254,6 @@ DrawAsteroid PROC USES ebx
   invoke RotateBlit, Asteroid.anim.frame_ptr, Asteroid.pos_x, Asteroid.pos_y, Asteroid.rotation, 255, 0
   ret
 DrawAsteroid ENDP
-
-DrawCollideWarning PROC
-  invoke DrawWord, OFFSET wCollide, LENGTHOF wCollide, 280, 200, 0c0h
-DrawCollideWarning ENDP
 
 TogglePause PROC USES eax
   mov eax, total_t
@@ -271,7 +274,12 @@ TogglePause PROC USES eax
     ret
 TogglePause ENDP
 
-GamePlay PROC USES eax ebx
+DrawCollideWarning PROC
+  invoke DrawWord, OFFSET wCollide, LENGTHOF wCollide, 280, 200, 0c0h
+  ret
+DrawCollideWarning ENDP
+
+GamePlay PROC USES eax ebx edx
   invoke UpdateTime
 
   .if pause != 0
@@ -293,7 +301,7 @@ GamePlay PROC USES eax ebx
   mov ah, Fighter.shader.cm_index
   mov al, Fighter.shader.cm_delta
   mov dh, Fighter.shader.cm_repeat
-  mov dl, LENGTHOF opacities
+  mov dl, Fighter.shader.cm_src_len
   dec dl
   add ah, al
   cmp al, 0
@@ -333,6 +341,27 @@ GamePlay PROC USES eax ebx
     movzx ecx, BYTE PTR [esi + ecx]
     mov Fighter.shader.colorMask, cl
 
+  mov ah, Fighter.shader.colorShift
+  mov al, Fighter.shader.cs_delta
+  mov dh, Fighter.shader.cs_repeat
+  mov dl, Fighter.shader.cs_bound
+  add ah, al
+  cmp ah, dl
+  jle repeat_behaviour
+  jmp set_colorshift
+  repeat_behaviour:
+    .if dh == ShaderRepeatStop
+      mov ah, 0
+      mov Fighter.shader.colorShift, 0
+      mov Fighter.shader.cs_delta, 0
+    .elseif dh == ShaderRepeatReverse
+      neg Fighter.shader.cs_delta
+    .else
+      mov ah, dh
+    .endif
+  set_colorshift:
+    mov Fighter.shader.colorShift, ah
+
   invoke UpdatePlayer
   invoke DrawPlayer
   invoke CalculateCollider, OFFSET Fighter
@@ -354,12 +383,18 @@ GamePlay ENDP
 
 GameInit PROC
   mov Fighter.shader.cm_index, 0
-  mov Fighter.shader.cm_delta, 1
+  mov Fighter.shader.cm_delta, 0
   mov Fighter.shader.cm_repeat, ShaderRepeatReverse
   mov Fighter.shader.colorMask, 0ffh
   mov Fighter.shader.cm_src_len, LENGTHOF opacities
   mov Fighter.shader.cm_src, OFFSET opacities
 
+  mov Fighter.shader.cs_bound, 0h
+  mov Fighter.shader.cs_delta, 01h
+  mov Fighter.shader.cs_repeat, 02h
+  mov Fighter.shader.colorShift, 0h
+
+  ;; Have to initialize the frame_ptr manually
   mov Fighter.anim.frame_ptr, OFFSET fighter_000
   mov Asteroid.anim.frame_ptr, OFFSET asteroid_000
 

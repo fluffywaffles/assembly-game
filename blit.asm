@@ -362,7 +362,7 @@ UnpackRect PROC USES esi r:PTR EECS205RECT
   ret
 UnpackRect ENDP
 
-CheckIntersectRect PROC USES ebx ecx one:PTR EECS205RECT, two:PTR EECS205RECT
+CheckIntersectRect PROC USES ebx ecx edx one:PTR EECS205RECT, two:PTR EECS205RECT
   LOCAL lone:DWORD, tone:DWORD, rone:DWORD, bone:DWORD
   LOCAL width1:DWORD, width2:DWORD, height1:DWORD, height2:DWORD
   LOCAL totalw:DWORD, totalh:DWORD
