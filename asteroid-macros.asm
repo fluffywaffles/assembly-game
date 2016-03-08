@@ -38,18 +38,7 @@ InitializeAsteroidShaders MACRO lst
     ELSE
       mov Asteroid&aid.anim.frame_ptr, OFFSET asteroid_002
     ENDIF
-    ;; set up Asteroid colormask
-    mov Asteroid&aid.shader.cm_index, 0
-    mov Asteroid&aid.shader.cm_delta, 0
-    mov Asteroid&aid.shader.cm_repeat, ShaderRepeatReverse
-    mov Asteroid&aid.shader.colorMask, 0ffh
-    mov Asteroid&aid.shader.cm_src_len, LENGTHOF opacities
-    mov Asteroid&aid.shader.cm_src, OFFSET opacities
-    ;; set up Asteroid colorshift
-    mov Asteroid&aid.shader.cs_bound, 250
-    mov Asteroid&aid.shader.cs_delta, 0
-    mov Asteroid&aid.shader.cs_repeat, 02h
-    mov Asteroid&aid.shader.colorShift, 0h
+    invoke CopyShader, OFFSET Asteroid&aid.shader, OFFSET BaseShader
   ENDM
 ENDM
 

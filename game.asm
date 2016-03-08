@@ -653,20 +653,7 @@ GameInit PROC
   ; also disable rainbow
   mov Fighter.shader.cs_delta, 0
 
-  ;; set up Asteroid colormask
-  mov Asteroid.shader.cm_index, 0
-  mov Asteroid.shader.cm_delta, 0
-  mov Asteroid.shader.cm_repeat, ShaderRepeatReverse
-  mov Asteroid.shader.colorMask, 0ffh
-  mov Asteroid.shader.cm_src_len, LENGTHOF opacities
-  mov Asteroid.shader.cm_src, OFFSET opacities
-
-  ;;; set up Asteroid colorshift
-  mov Asteroid.shader.cs_bound, 0h
-  mov Asteroid.shader.cs_delta, 0h
-  mov Asteroid.shader.cs_repeat, ShaderRepeatReverse
-  mov Asteroid.shader.colorShift, 0h
-
+  ; no shader on Asteroid
   invoke CopyShader, OFFSET Asteroid.shader, OFFSET BaseShader
 
   ;; Have to initialize the frame_ptr manually, for some reason
