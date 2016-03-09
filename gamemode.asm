@@ -87,7 +87,7 @@ DrawSelectionScreen MACRO x:req, y:req, color:req
   yi = yi + 2
 
   xi = 5
-  FORC lttr, <1 basic mode>
+  FORC lttr, <1 basic mode      ends at 15>
     invoke DrawLetter, OFFSET @CatStr(<l7>, <lttr>), x + xpad*xi, y + ypad*yi, 01ch
     xi = xi + 1
   ENDM
@@ -95,7 +95,7 @@ DrawSelectionScreen MACRO x:req, y:req, color:req
   yi = yi + 1
 
   xi = 5
-  FORC lttr, <2 hard mode>
+  FORC lttr, <2 hard mode       ends at 10>
     invoke DrawLetter, OFFSET @CatStr(<l7>, <lttr>), x + xpad*xi, y + ypad*yi, 01ch
     xi = xi + 1
   ENDM
@@ -103,10 +103,12 @@ DrawSelectionScreen MACRO x:req, y:req, color:req
   yi = yi + 1
 
   xi = 5
-  FORC lttr, <3 insane mode>
+  FORC lttr, <3 insane mode     seizure warning>
     invoke DrawLetter, OFFSET @CatStr(<l7>, <lttr>), x + xpad*xi, y + ypad*yi, 01ch
     xi = xi + 1
   ENDM
+
+  invoke DrawLetter, OFFSET l7exclamation, x + xpad*xi, y + ypad*yi, 01ch
 
   yi = yi + 2
 

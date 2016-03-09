@@ -686,6 +686,8 @@ Randomize ENDP
 Setup PROC
 ; Sets up the game state to be played in GameMode mode
 ;===============================================================================
+  mov score, 0
+
   mov Asteroid.position.x, ASTEROID_INITIAL_X
   mov Asteroid.position.y, ASTEROID_INITIAL_Y
   mov Asteroid.velocity.angular, ASTEROID_INITIAL_VA
@@ -694,6 +696,7 @@ Setup PROC
   invoke CopyShader, OFFSET Asteroid.shader, OFFSET BaseShader
 
   mov Fighter.shader.cs_delta, 0
+  mov Fighter.shader.colorShift, 0
 
   InitializeAllAsteroids
 
