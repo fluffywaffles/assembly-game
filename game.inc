@@ -68,34 +68,23 @@ Shader STRUCT
   ALIGN DWORD
   cm_src     DWORD ? ; ptr to colorMask source array
   ; compare colorShift against cs_bound to determine when to repeat
-  cs_bound   BYTE ? ; shift boundary (at which to stop/repeat)
+  cs_bound_lo BYTE ? ; shift boundary (at which to stop/repeat)
+  cs_bound_hi BYTE ?
   cs_delta   BYTE ? ; shift change per frame
   cs_repeat  BYTE ? ; shift repeat behaviour
   colorShift BYTE ? ; current color shift
 Shader ENDS
 
-Acceleration STRUCT
+XYA STRUCT
   x FXPT ?
   y FXPT ?
   angular FXPT ?
-Acceleration ENDS
-
-Velocity STRUCT
-  x FXPT ?
-  y FXPT ?
-  angular FXPT ?
-Velocity ENDS
-
-Position STRUCT
-  x FXPT ?
-  y FXPT ?
-  rotation FXPT ?
-Position ENDS
+XYA ENDS
 
 AnimatedCharacter STRUCT
-  position Position <>
-  velocity Velocity <>
-  acceleration Acceleration <>
+  position XYA <>
+  velocity XYA <>
+  acceleration XYA <>
   collider EECS205RECT <>
   anim     Animation <>
   shader   Shader <>

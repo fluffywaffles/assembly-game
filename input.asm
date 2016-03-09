@@ -30,6 +30,9 @@ k_up    BYTE ?
 k_left  BYTE ?
 k_right BYTE ?
 k_down  BYTE ?
+k_one   BYTE ?
+k_two   BYTE ?
+k_three BYTE ?
 
 .CODE
 
@@ -123,6 +126,18 @@ UnpackKeyPress PROC USES eax ebx
   invoke GetZF
   or  k_down, al
 
+  cmp ebx, VK_1
+  invoke GetZF
+  mov  k_one, al
+
+  cmp ebx, VK_2
+  invoke GetZF
+  mov  k_two, al
+
+  cmp ebx, VK_3
+  invoke GetZF
+  mov  k_three, al
+
   IFDEF DEBUG
 
   .if k_up
@@ -159,6 +174,24 @@ UnpackKeyPress PROC USES eax ebx
     invoke PLOT, DEBUG_X, DEBUG_Y + 10, 01ch
   .else
     invoke PLOT, DEBUG_X, DEBUG_Y + 10, 0c0h
+  .endif
+
+  .if k_one
+    invoke PLOT, DEBUG_X, DEBUG_Y + 16, 01ch
+  .else
+    invoke PLOT, DEBUG_X, DEBUG_Y + 16, 0c0h
+  .endif
+
+  .if k_two
+    invoke PLOT, DEBUG_X + 2, DEBUG_Y + 16, 01ch
+  .else
+    invoke PLOT, DEBUG_X + 2, DEBUG_Y + 16, 0c0h
+  .endif
+
+  .if k_three
+    invoke PLOT, DEBUG_X + 4, DEBUG_Y + 16, 01ch
+  .else
+    invoke PLOT, DEBUG_X + 4, DEBUG_Y + 16, 0c0h
   .endif
 
   ENDIF

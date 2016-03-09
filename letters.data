@@ -271,6 +271,14 @@ l5exclamation Letter < 5, offset l5exclamation + sizeof l5exclamation >
     BYTE 0ffh, 0ffh, 0ffh, 0ffh, 0ffh
     BYTE 0ffh, 0h, 0ffh, 0ffh, 0ffh
 
+l7  Letter < 7, offset l7 + sizeof l7 >
+    BYTE 0ffh, 0ffh, 0ffh, 0ffh, 0ffh, 0ffh, 0ffh
+    BYTE 0ffh, 0ffh, 0ffh, 0ffh, 0ffh, 0ffh, 0ffh
+    BYTE 0ffh, 0ffh, 0ffh, 0ffh, 0ffh, 0ffh, 0ffh
+    BYTE 0ffh, 0ffh, 0ffh, 0ffh, 0ffh, 0ffh, 0ffh
+    BYTE 0ffh, 0ffh, 0ffh, 0ffh, 0ffh, 0ffh, 0ffh
+    BYTE 0ffh, 0ffh, 0ffh, 0ffh, 0ffh, 0ffh, 0ffh
+    BYTE 0ffh, 0ffh, 0ffh, 0ffh, 0ffh, 0ffh, 0ffh
 l70 Letter < 7, offset l70 + sizeof l70 >
     BYTE 0ffh, 0h, 0h, 0h, 0h, 0h, 0ffh
     BYTE 0h, 0ffh, 0ffh, 0ffh, 0ffh, 0h, 0h
@@ -569,3 +577,19 @@ l7exclamation Letter < 7, offset l7exclamation + sizeof l7exclamation >
     BYTE 0ffh, 0h, 0ffh, 0ffh, 0ffh, 0ffh, 0ffh
     BYTE 0ffh, 0ffh, 0ffh, 0ffh, 0ffh, 0ffh, 0ffh
     BYTE 0ffh, 0h, 0ffh, 0ffh, 0ffh, 0ffh, 0ffh
+l7question Letter < 7, offset l7question + sizeof l7question >
+    BYTE 0ffh, 0h, 0h, 0h, 0h, 0h, 0ffh
+    BYTE 0h, 0ffh, 0ffh, 0ffh, 0ffh, 0ffh, 0h
+    BYTE 0ffh, 0h, 0ffh, 0ffh, 0ffh, 0ffh, 0h
+    BYTE 0ffh, 0ffh, 0ffh, 0ffh, 0h, 0h, 0ffh
+    BYTE 0ffh, 0ffh, 0ffh, 0h, 0ffh, 0ffh, 0ffh
+    BYTE 0ffh, 0ffh, 0ffh, 0ffh, 0ffh, 0ffh, 0ffh
+    BYTE 0ffh, 0ffh, 0ffh, 0h, 0ffh, 0ffh, 0ffh
+l7dot Letter < 7, offset l7dot + sizeof l7dot >
+    BYTE 0ffh, 0ffh, 0ffh, 0ffh, 0ffh, 0ffh, 0ffh
+    BYTE 0ffh, 0ffh, 0ffh, 0ffh, 0ffh, 0ffh, 0ffh
+    BYTE 0ffh, 0ffh, 0ffh, 0ffh, 0ffh, 0ffh, 0ffh
+    BYTE 0ffh, 0ffh, 0ffh, 0ffh, 0ffh, 0ffh, 0ffh
+    BYTE 0ffh, 0ffh, 0ffh, 0ffh, 0ffh, 0ffh, 0ffh
+    BYTE 0ffh, 0ffh, 0ffh, 0ffh, 0ffh, 0ffh, 0ffh
+    BYTE 0ffh, 0ffh, 0ffh, 0h, 0ffh, 0ffh, 0ffh

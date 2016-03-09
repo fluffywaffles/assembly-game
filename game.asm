@@ -48,6 +48,11 @@ include letters.inc
 include asteroid-macros.asm
 ;-------------------------------------------------------------------------------
 
+;-------------------------------------------------------------------------------
+; GameMode macros
+include gamemode.asm
+;-------------------------------------------------------------------------------
+
 .DATA
 
 ;===============================================================================
@@ -102,13 +107,13 @@ Ticks DWORD 0
 ;; Shaders (These are just examples)
 ;-------------------------------------------------------------------------------
 ;; "Base" Shader                              ; $ = current addr, no source array
-BaseShader Shader { 0, 0, ShaderRepeatStop, 0ffh, 0, $, 0, 0, ShaderRepeatStop, 0 }
+BaseShader Shader { 0, 0, ShaderRepeatStop, 0ffh, 0, $, 0, 0, 0, ShaderRepeatStop, 0 }
 ;; Shader source array for FadeInOut
 opacities BYTE 4 DUP(0ffh), 4 DUP(0dah), 4 DUP(09h), 4 DUP(0)
 ;; ColorMask shader
-FadeInOut Shader { 0, 2, ShaderRepeatReverse, 0ffh, LENGTHOF opacities, OFFSET opacities, ?, ?, ?, ? }
+FadeInOut Shader { 0, 2, ShaderRepeatReverse, 0ffh, LENGTHOF opacities, OFFSET opacities, ?, ?, ?, ?, ? }
 ;; ColorShift shader
-Rainbow Shader   { ?, ?, ?, ?, ?, ?, 36, 1, ShaderRepeatReverse, 0 }
+Rainbow Shader   { ?, ?, ?, ?, ?, ?, 0, 36, 1, ShaderRepeatReverse, 0 }
 ;-------------------------------------------------------------------------------
 
 ;-------------------------------------------------------------------------------
@@ -129,7 +134,7 @@ Fighter AnimatedCharacter {\
 Asteroid AnimatedCharacter {\
   <013f0000h, 0ef0000h, 0>,  ; position
   <0, 0, 08000h>, ; velocity
-  <0, 0800h, 0>, ; acceleration
+  <0, 010000h, 0>, ; acceleration
   ,               ; collider
   <0, 1, SIZEOF EECS205BITMAP, OFFSET asteroid_000>\ ; animation
 }
@@ -157,13 +162,23 @@ scoreStr    BYTE 256 DUP(0)
 ;; Scoring Data
 ;-------------------------------------------------------------------------------
 score               DWORD 0
-last_score_ticks    DWORD 0
-score_tick_interval DWORD 10
 
 ;-------------------------------------------------------------------------------
 ;; Background Music
 ;-------------------------------------------------------------------------------
 music BYTE "music.wav", 0
+
+;-------------------------------------------------------------------------------
+;; Game Mode
+;-------------------------------------------------------------------------------
+;; GameModes
+GMSelect = 0
+GMBasic  = 1
+GMHard   = 2
+GMInsane = 3
+
+;; Current Mode
+GameMode BYTE GMSelect
 
 .CODE
 ;===============================================================================
@@ -236,7 +251,7 @@ CalculateCollider PROC USES eax edx character:PTR AnimatedCharacter
   mov bottom, edx
 
   ;; pffff rotating the collider, hah, that seemed like a good idea
-  mov edx, [esi].position.rotation
+  mov edx, [esi].position.angular
   add edx, rot_offset
   neg edx
   invoke FixedSin, edx
@@ -299,10 +314,12 @@ CalculateCollider PROC USES eax edx character:PTR AnimatedCharacter
   invoke DrawLine, xpsin, ypcos, xpcos, y_sin, 03h
   invoke DrawLine, xpsin, ypcos, x_cos, ypsin, 03h
 
-  invoke DrawLine, [esi].collider.dwLeft, [esi].collider.dwTop, [esi].collider.dwRight, [esi].collider.dwTop, 01ch
-  invoke DrawLine, [esi].collider.dwLeft, [esi].collider.dwBottom, [esi].collider.dwRight, [esi].collider.dwBottom, 01ch
-  invoke DrawLine, [esi].collider.dwLeft, [esi].collider.dwTop, [esi].collider.dwLeft, [esi].collider.dwBottom, 01ch
-  invoke DrawLine, [esi].collider.dwRight, [esi].collider.dwTop, [esi].collider.dwRight, [esi].collider.dwBottom, 01ch
+  .if bottom < SCREEN_Y_MAX && top > SCREEN_Y_MIN ; this is an interesting bug
+    invoke DrawLine, [esi].collider.dwLeft, [esi].collider.dwTop, [esi].collider.dwRight, [esi].collider.dwTop, 01ch
+    invoke DrawLine, [esi].collider.dwLeft, [esi].collider.dwBottom, [esi].collider.dwRight, [esi].collider.dwBottom, 01ch
+    invoke DrawLine, [esi].collider.dwLeft, [esi].collider.dwTop, [esi].collider.dwLeft, [esi].collider.dwBottom, 01ch
+    invoke DrawLine, [esi].collider.dwRight, [esi].collider.dwTop, [esi].collider.dwRight, [esi].collider.dwBottom, 01ch
+  .endif
   ENDIF
 
   ret
@@ -313,18 +330,9 @@ CalculateCollider ENDP
 UpdatePlayer PROC USES eax
 ; Update the struct containing the Player's data based on input
 ;===============================================================================
-  .if k_down == 1
-    .if Fighter.shader.cm_delta != 0
-      mov Fighter.shader.cm_delta, 0
-    .else
-      mov Fighter.shader.cm_delta, 2
-    .endif
-    mov Fighter.shader.cm_index, 0
-  .endif
-
   .if m_click == 1 || m_rclick == 1
     mov Fighter.anim.frame_ptr, OFFSET fighter_001
-    .if Fighter.position.rotation > 0 && Fighter.position.rotation < PI
+    .if Fighter.position.angular > 0 && Fighter.position.angular < PI
       add Fighter.acceleration.x, 050000h
     .else
       sub Fighter.acceleration.x, 050000h
@@ -341,15 +349,15 @@ UpdatePlayer PROC USES eax
   .endif
 
   .if k_right == 1
-    add Fighter.position.rotation, 02000h
-    .if Fighter.position.rotation > TWO_PI
-      sub Fighter.position.rotation, TWO_PI
+    add Fighter.position.angular, 02000h
+    .if Fighter.position.angular > TWO_PI
+      sub Fighter.position.angular, TWO_PI
     .endif
   .elseif k_left == 1
-    .if Fighter.position.rotation < 02000h
-      add Fighter.position.rotation, TWO_PI
+    .if Fighter.position.angular < 02000h
+      add Fighter.position.angular, TWO_PI
     .endif
-    sub Fighter.position.rotation, 02000h
+    sub Fighter.position.angular, 02000h
   .endif
 
   ret
@@ -375,8 +383,8 @@ Update PROC USES eax esi character:PTR AnimatedCharacter
   invoke AXP, [esi].velocity.y, delta_t, [esi].position.y
   mov [esi].position.y, eax
 
-  invoke AXP, [esi].velocity.angular, delta_t, [esi].position.rotation
-  mov [esi].position.rotation, eax
+  invoke AXP, [esi].velocity.angular, delta_t, [esi].position.angular
+  mov [esi].position.angular, eax
 
   ret
 Update ENDP
@@ -393,7 +401,7 @@ Draw PROC USES esi ebx ecx edx character:PTR AnimatedCharacter
   mov ebx, eax
   invoke fxpt2int, [esi].position.x
   ; eax = fxpt2int position.x
-  invoke RotateBlit, [esi].anim.frame_ptr, eax, ebx, [esi].position.rotation, ecx, edx
+  invoke RotateBlit, [esi].anim.frame_ptr, eax, ebx, [esi].position.angular, ecx, edx
   ret
 Draw ENDP
 
@@ -551,22 +559,22 @@ CalculateShaderColorShift PROC USES eax ecx edx esi character:PTR AnimatedCharac
   mov esi, character
   mov ah, [esi].shader.colorShift
   mov al, [esi].shader.cs_delta
-  mov dh, [esi].shader.cs_repeat
-  mov dl, [esi].shader.cs_bound
+  mov bh, [esi].shader.cs_repeat
+  mov dh, [esi].shader.cs_bound_hi
+  mov dl, [esi].shader.cs_bound_lo
   add ah, al
-  cmp ah, dl
-  je  repeat_behaviour
-  jmp set_colorshift
+
+  .if ah < dh && ah > dl
+    ; inside bounds
+    jmp set_colorshift
+  .endif
+
   repeat_behaviour:
-    .if dh == ShaderRepeatStop
-      mov ah, 0
-      mov [esi].shader.colorShift, 0
-      mov [esi].shader.cs_delta, 0
-    .elseif dh == ShaderRepeatReverse
-      neg [esi].shader.cs_delta
-      sub dl, 36
-      neg dl
-      mov [esi].shader.cs_bound, dl
+    .if bh == ShaderRepeatStop
+      mov ah, 0 ; reset
+      mov [esi].shader.cs_delta, 0 ; stop
+    .elseif bh == ShaderRepeatReverse
+      neg [esi].shader.cs_delta ; reverse
     .else
       mov ah, dh
     .endif
@@ -591,13 +599,7 @@ UpdateTicks ENDP
 UpdateScore PROC
 ; Updates the score and draws it to screen
 ;===============================================================================
-  mov eax, Ticks
-  sub eax, last_score_ticks
-  .if eax > score_tick_interval
-    mov eax, Ticks
-    mov last_score_ticks, eax
-    inc score
-  .endif
+  add score, 2
   rdtsc
   push score
   push offset scoreFmtStr
@@ -609,6 +611,14 @@ UpdateScore PROC
 UpdateScore ENDP
 
 ;===============================================================================
+; Game State
+Setup PROC
+; Sets up the game state to be played in GameMode mode
+;===============================================================================
+  ret
+Setup ENDP
+
+;===============================================================================
 ; Library Function
 GamePlay PROC USES eax ebx edx
 ; Called by the game library on every frame
@@ -616,16 +626,29 @@ GamePlay PROC USES eax ebx edx
   invoke UpdateTime
   invoke UpdateTicks
 
-  .if pause != 0
+  .if pause
     jmp skip_frame
   .endif
 
   invoke cls
 
-  invoke UpdateScore
-
   invoke UnpackMouse
   invoke UnpackKeyPress
+
+  .if GameMode == GMSelect
+    DrawSelectionScreen 150, 65, 0ffh
+    .if k_one == 1
+      mov GameMode, GMBasic
+    .elseif k_two == 1
+      mov GameMode, GMHard
+    .elseif k_three == 1
+      mov GameMode, GMInsane
+    .endif
+    invoke Setup
+    jmp skip_frame
+  .endif
+
+  invoke UpdateScore
 
   IFDEF DEBUG
 
@@ -670,13 +693,19 @@ GamePlay PROC USES eax ebx edx
   CalculateAllAsteroidsColliders
 
   invoke CheckIntersectRect, OFFSET Fighter.collider, OFFSET Asteroid.collider
-  cmp eax, 1
-  jne no_collision
 
-  sub score, 1
-  invoke UpdateScore
+  mov ebx, eax
+
+  CheckIntersectAllAsteroids
+
+  cmp ebx, 1
+  jne no_collision
+  sub score, 20
 
   no_collision:
+
+  invoke UpdateScore
+
   skip_frame:
     ; Check for pause at the end of the frame so that we pause on the most
     ; recently updated screen instead of 1 frame behind
@@ -697,7 +726,7 @@ Randomize PROC USES eax character:PTR AnimatedCharacter
   mov [esi].position.y, eax
 
   invoke nrandom, TWO_PI
-  mov [esi].position.rotation, eax
+  mov [esi].position.angular, eax
 
   invoke nrandom, 01000h
   mov [esi].velocity.angular, eax
@@ -753,5 +782,15 @@ GameInit PROC
 
 	ret
 GameInit ENDP
+
+;===============================================================================
+; Game State
+GameOver PROC
+; Called when the game ends, returns you to the selection screen
+;===============================================================================
+  mov pause, 1
+
+  ret
+GameOver ENDP
 
 END

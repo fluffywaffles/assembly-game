@@ -48,7 +48,12 @@ InitializeAsteroidShaders MACRO lst
     ELSE
       mov Asteroid&aid.anim.frame_ptr, OFFSET asteroid_002
     ENDIF
-    invoke CopyShader, OFFSET Asteroid&aid.shader, OFFSET BaseShader
+    invoke CopyShaders, OFFSET Asteroid&aid.shader, OFFSET FadeInOut, OFFSET Rainbow
+
+    ; disable fade
+    mov Asteroid&aid.shader.cm_delta, 0
+    ; disable rainbow
+    mov Asteroid&aid.shader.cs_delta, 0
 
     invoke Randomize, OFFSET Asteroid&aid
   ENDM
@@ -76,6 +81,13 @@ ENDM
 CalculateAsteroidsColliders MACRO lst
   %FOR aid, lst
     invoke CalculateCollider, OFFSET Asteroid&aid
+  ENDM
+ENDM
+
+CheckIntersectAsteroids MACRO lst
+  %FOR aid, lst
+    invoke CheckIntersectRect, OFFSET Fighter.collider, OFFSET Asteroid&aid&.collider
+    or ebx, eax
   ENDM
 ENDM
 
@@ -112,4 +124,11 @@ CalculateAllAsteroidsColliders MACRO
   CalculateAsteroidsColliders AsteroidList2
   CalculateAsteroidsColliders AsteroidList3
   CalculateAsteroidsColliders AsteroidList4
+ENDM
+
+CheckIntersectAllAsteroids MACRO
+  CheckIntersectAsteroids AsteroidList
+  CheckIntersectAsteroids AsteroidList2
+  CheckIntersectAsteroids AsteroidList3
+  CheckIntersectAsteroids AsteroidList4
 ENDM

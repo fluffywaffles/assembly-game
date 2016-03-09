@@ -12,6 +12,9 @@ EXTERNDEF k_up    :BYTE
 EXTERNDEF k_left  :BYTE
 EXTERNDEF k_right :BYTE
 EXTERNDEF k_down  :BYTE
+EXTERNDEF k_one   :BYTE
+EXTERNDEF k_two   :BYTE
+EXTERNDEF k_three :BYTE
 
 UnpackMouse PROTO
 UnpackKeyPress PROTO

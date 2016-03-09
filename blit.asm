@@ -304,7 +304,7 @@ RotateBlit PROC lpBmp:PTR EECS205BITMAP, xcenter:DWORD, ycenter:DWORD, angle:FXP
           invoke CalcDrawCoord, ycenter, ecx, shiftY
           mov drawY, eax
 
-          invoke Within, drawX, 0, 639
+          invoke Within, drawX, SCREEN_X_MIN, SCREEN_X_MAX
           cmp eax, 1
           jne for_y_eval
 
@@ -312,7 +312,7 @@ RotateBlit PROC lpBmp:PTR EECS205BITMAP, xcenter:DWORD, ycenter:DWORD, angle:FXP
           invoke PLOT, drawX, 15, 0c0h
           ENDIF
 
-          invoke Within, drawY, 0, 479
+          invoke Within, drawY, SCREEN_Y_MIN, SCREEN_Y_MAX
           cmp eax, 1
           jne for_y_eval
 
