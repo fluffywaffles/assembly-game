@@ -1,6 +1,6 @@
 ;; DEBUG flag
 
-DEBUG = 0
+;DEBUG = 0
 
 ;; Screen data
 

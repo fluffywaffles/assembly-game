@@ -48,12 +48,7 @@ InitializeAsteroidShaders MACRO lst
     ELSE
       mov Asteroid&aid.anim.frame_ptr, OFFSET asteroid_002
     ENDIF
-    invoke CopyShaders, OFFSET Asteroid&aid.shader, OFFSET FadeInOut, OFFSET Rainbow
-
-    ; disable fade
-    mov Asteroid&aid.shader.cm_delta, 0
-    ; disable rainbow
-    mov Asteroid&aid.shader.cs_delta, 0
+    invoke CopyShader, OFFSET Asteroid&aid.shader, OFFSET BaseShader
 
     invoke Randomize, OFFSET Asteroid&aid
   ENDM
@@ -91,44 +86,79 @@ CheckIntersectAsteroids MACRO lst
   ENDM
 ENDM
 
+CountAsteroidsVisible MACRO lst
+  %FOR aid, lst
+    invoke fxpt2int, Asteroid&aid.position.y
+    mov edx, eax
+    invoke fxpt2int, Asteroid&aid.position.x
+
+    .if eax > SCREEN_X_MIN && eax < SCREEN_X_MAX
+      .if edx > SCREEN_Y_MIN && edx < SCREEN_Y_MAX
+        inc ecx
+      .endif
+    .endif
+  ENDM
+ENDM
+
+AsteroidsCopyShaders MACRO lst, s1, s2
+  %FOR aid, lst
+    invoke CopyShaders, OFFSET Asteroid&aid.shader, OFFSET s1, OFFSET s2
+  ENDM
+ENDM
+
+AllAsteroidsCopyShaders MACRO s1, s2
+  AsteroidsCopyShaders AsteroidList, s1, s2
+  AsteroidsCopyShaders AsteroidList2, s1, s2
+  AsteroidsCopyShaders AsteroidList3, s1, s2
+  AsteroidsCopyShaders AsteroidList4, s1, s2
+ENDM
+
+InvokeOnAsteroids MACRO fn
+  %FOR aid, lst
+    invoke fn, Asteroid&aid
+  ENDM
+ENDM
+
+RandomizeAsteroids MACRO lst
+  InvokeOnAsteroids Randomize
+ENDM
+
+AllAsteroids MACRO m
+  m AsteroidList
+  m AsteroidList2
+  m AsteroidList3
+  m AsteroidList4
+ENDM
+
 InitializeAllAsteroids MACRO
-  InitializeAsteroidShaders AsteroidList
-  InitializeAsteroidShaders AsteroidList2
-  InitializeAsteroidShaders AsteroidList3
-  InitializeAsteroidShaders AsteroidList4
+  AllAsteroids InitializeAsteroidShaders
 ENDM
 
 CalculateAllAsteroidsShaders MACRO
-  CalculateAsteroidsShaders AsteroidList
-  CalculateAsteroidsShaders AsteroidList2
-  CalculateAsteroidsShaders AsteroidList3
-  CalculateAsteroidsShaders AsteroidList4
+  AllAsteroids CalculateAsteroidsShaders
 ENDM
 
 DrawAllAsteroids MACRO
-  DrawAsteroids AsteroidList
-  DrawAsteroids AsteroidList2
-  DrawAsteroids AsteroidList3
-  DrawAsteroids AsteroidList4
+  AllAsteroids DrawAsteroids
 ENDM
 
 UpdateAllAsteroids MACRO
-  UpdateAsteroids AsteroidList
-  UpdateAsteroids AsteroidList2
-  UpdateAsteroids AsteroidList3
-  UpdateAsteroids AsteroidList4
+  AllAsteroids UpdateAsteroids
 ENDM
 
 CalculateAllAsteroidsColliders MACRO
-  CalculateAsteroidsColliders AsteroidList
-  CalculateAsteroidsColliders AsteroidList2
-  CalculateAsteroidsColliders AsteroidList3
-  CalculateAsteroidsColliders AsteroidList4
+  AllAsteroids CalculateAsteroidsColliders
 ENDM
 
 CheckIntersectAllAsteroids MACRO
-  CheckIntersectAsteroids AsteroidList
-  CheckIntersectAsteroids AsteroidList2
-  CheckIntersectAsteroids AsteroidList3
-  CheckIntersectAsteroids AsteroidList4
+  AllAsteroids CheckIntersectAsteroids
+ENDM
+
+RandomizeAllAsteroids MACRO
+  AllAsteroids RandomizeAsteroids
+ENDM
+
+CountAllAsteroidsVisible MACRO
+  xor ecx, ecx
+  AllAsteroids CountAsteroidsVisible
 ENDM

@@ -126,11 +126,18 @@ Fighter AnimatedCharacter {\
   ,              ; collider
   <0, 3, SIZEOF EECS205BITMAP, OFFSET fighter_000>\ ; animation
 }
+
+max_velocity FXPT 0500000h
 ;-------------------------------------------------------------------------------
 
 ;-------------------------------------------------------------------------------
 ;; Asteroid
 ;-------------------------------------------------------------------------------
+ASTEROID_INITIAL_X = 013f0000h
+ASTEROID_INITIAL_Y = 0ef0000h
+ASTEROID_INITIAL_VA = 08000h
+ASTEROID_INITIAL_AY = 010000h
+
 Asteroid AnimatedCharacter {\
   <013f0000h, 0ef0000h, 0>,  ; position
   <0, 0, 08000h>, ; velocity
@@ -155,13 +162,19 @@ wCollide DWORD l7c, l7o, l7l,
                l7l, l7i, l7d,
                l7e, l7exclamation
 
+wGameOver DWORD l7g, l7a, l7m, l7e, l7, l7o, l7v, l7e, l7r, l7exclamation
+
 scoreFmtStr BYTE "SCORE! %d", 0
 scoreStr    BYTE 256 DUP(0)
+
+asteroidFmtStr BYTE "ASTEROIDS REMAINING: %d", 0
+asteroidStr    BYTE 256 DUP(0)
 
 ;-------------------------------------------------------------------------------
 ;; Scoring Data
 ;-------------------------------------------------------------------------------
 score               DWORD 0
+asteroid_minimum    DWORD 10
 
 ;-------------------------------------------------------------------------------
 ;; Background Music
@@ -176,6 +189,7 @@ GMSelect = 0
 GMBasic  = 1
 GMHard   = 2
 GMInsane = 3
+GMOver   = 4
 
 ;; Current Mode
 GameMode BYTE GMSelect
@@ -606,17 +620,140 @@ UpdateScore PROC
   push offset scoreStr
   call wsprintf
   add esp, 12
-  invoke DrawStr, OFFSET scoreStr, 300, 400, 0c3h
+  invoke DrawStr, OFFSET scoreStr, 260, 400, 0c3h
   ret
 UpdateScore ENDP
+
+;===============================================================================
+; Remaining Asteroids
+DrawAsteroidRemainingCount PROC USES ecx count:DWORD
+; Draws the number of asteroids still remaining to be dodged
+;===============================================================================
+  rdtsc
+  push count
+  push offset asteroidFmtStr
+  push offset asteroidStr
+  call wsprintf
+  add esp, 12
+  invoke DrawStr, OFFSET asteroidStr, 20, 400, 01ch
+  ret
+DrawAsteroidRemainingCount ENDP
+
+Randomize PROC USES eax character:PTR AnimatedCharacter
+  mov esi, character
+
+  invoke nrandom, SCREEN_X_MAX
+  invoke int2fxpt, eax
+  mov [esi].position.x, eax
+
+  invoke nrandom, 50
+  add eax, 100
+  invoke int2fxpt, eax
+  mov [esi].position.y, eax
+
+  invoke nrandom, TWO_PI
+  mov [esi].position.angular, eax
+
+  invoke nrandom, 01000h
+  mov [esi].velocity.angular, eax
+
+  invoke nrandom, 010000h
+  sub eax, 08000h
+  mov [esi].acceleration.x, eax
+
+  invoke nrandom, 010000h
+  sub eax, 08000h
+  mov [esi].acceleration.y, eax
+
+  ;invoke nrandom, 040000h
+  ;sub eax, 020000h
+  mov [esi].velocity.x, 0
+
+  ;invoke nrandom, 040000h
+  ;sub eax, 020000h
+  mov [esi].velocity.y, 0
+
+  invoke nrandom, 2
+  .if eax == 0
+    neg [esi].velocity.angular
+  .endif
+
+  ret
+Randomize ENDP
 
 ;===============================================================================
 ; Game State
 Setup PROC
 ; Sets up the game state to be played in GameMode mode
 ;===============================================================================
+  mov Asteroid.position.x, ASTEROID_INITIAL_X
+  mov Asteroid.position.y, ASTEROID_INITIAL_Y
+  mov Asteroid.velocity.angular, ASTEROID_INITIAL_VA
+  mov Asteroid.velocity.y, 0
+  mov Asteroid.acceleration.y, ASTEROID_INITIAL_AY
+  invoke CopyShader, OFFSET Asteroid.shader, OFFSET BaseShader
+
+  mov Fighter.shader.cs_delta, 0
+
+  InitializeAllAsteroids
+
+  .if GameMode == GMBasic
+    mov asteroid_minimum, 15
+    mov delta_t, 01555h
+    %FOR aid, AsteroidList2
+      IF aid GT 95
+        mov Asteroid&aid.acceleration.x, 0
+        mov Asteroid&aid.acceleration.y, 0
+      ENDIF
+    ENDM
+  .else
+    mov asteroid_minimum, 10
+    mov delta_t, 02000h
+  .endif
+
+  .if GameMode == GMInsane
+    invoke CopyShaders, OFFSET Asteroid.shader, OFFSET FadeInOut, OFFSET Rainbow
+    AllAsteroidsCopyShaders FadeInOut, Rainbow
+    mov al, Rainbow.cs_delta
+    mov Fighter.shader.cs_delta, al
+  .endif
   ret
 Setup ENDP
+
+;===============================================================================
+; Game State
+GameOver PROC
+; Called when the game ends, returns you to the selection screen
+;===============================================================================
+  X = 280
+  Y = 200
+
+  FOR off, <0, 1, 2, 3>
+    invoke DrawWord, OFFSET wGameOver, LENGTHOF wGameOver, X + off, Y + 8 + off, 03h
+  ENDM
+
+  FOR off, <3, 2, 1, 0>
+    invoke DrawWord, OFFSET wGameOver, LENGTHOF wGameOver, X + off, Y + 4 + off, 0c0h
+  ENDM
+
+  FOR off, <0, 1, 2, 3>
+    invoke DrawWord, OFFSET wGameOver, LENGTHOF wGameOver, X + off, Y + off, 01ch
+  ENDM
+
+  invoke DrawWord, OFFSET wGameOver, LENGTHOF wGameOver, X - 1, Y - 3, 0ffh
+  invoke DrawWord, OFFSET wGameOver, LENGTHOF wGameOver, X, Y - 2, 0h
+  invoke DrawWord, OFFSET wGameOver, LENGTHOF wGameOver, X + 1, Y - 2, 0h
+
+  x = 230
+  y = 300
+  xi = 0
+  FORC lttr, <press space to restart>
+    invoke DrawLetter, OFFSET @CatStr(<l7>, <lttr>), x + 8*xi, y, 0ffh
+    xi = xi + 1
+  ENDM
+
+  ret
+GameOver ENDP
 
 ;===============================================================================
 ; Library Function
@@ -626,14 +763,26 @@ GamePlay PROC USES eax ebx edx
   invoke UpdateTime
   invoke UpdateTicks
 
+  invoke UnpackMouse
+  invoke UnpackKeyPress
+
+  .if GameMode == GMOver
+    .if k_space == 1
+      mov GameMode, GMSelect
+    .endif
+    jmp skip_frame
+  .endif
+
   .if pause
     jmp skip_frame
   .endif
 
   invoke cls
 
-  invoke UnpackMouse
-  invoke UnpackKeyPress
+  IFDEF DEBUG
+    invoke UnpackMouse
+    invoke UnpackKeyPress
+  ENDIF
 
   .if GameMode == GMSelect
     DrawSelectionScreen 150, 65, 0ffh
@@ -667,6 +816,15 @@ GamePlay PROC USES eax ebx edx
   invoke UpdatePlayer
   invoke Update, OFFSET Fighter
 
+  mov eax, max_velocity
+  mov ebx, eax
+  neg ebx
+  .if Fighter.velocity.x > eax
+    mov Fighter.velocity.x, eax
+  .elseif Fighter.velocity.x < ebx
+    mov Fighter.velocity.x, ebx
+  .endif
+
   invoke int2fxpt, 639 - 42
   mov ebx, eax
   invoke int2fxpt, 32
@@ -699,61 +857,35 @@ GamePlay PROC USES eax ebx edx
   CheckIntersectAllAsteroids
 
   cmp ebx, 1
-  jne no_collision
+  jne after_collision
   sub score, 20
 
-  no_collision:
+  after_collision:
 
   invoke UpdateScore
+
+  CountAllAsteroidsVisible
+
+  .if Asteroid.position.x < SCREEN_X_MAX && Asteroid.position.x > SCREEN_X_MIN
+    .if Asteroid.position.y < SCREEN_Y_MAX && Asteroid.position.y > SCREEN_Y_MIN
+      inc ecx
+    .endif
+  .endif
+
+  invoke DrawAsteroidRemainingCount, ecx
+
+  .if ecx <= asteroid_minimum
+    invoke GameOver
+    mov GameMode, GMOver
+  .endif
 
   skip_frame:
     ; Check for pause at the end of the frame so that we pause on the most
     ; recently updated screen instead of 1 frame behind
     invoke TogglePause
+
   	ret
 GamePlay ENDP
-
-Randomize PROC USES eax character:PTR AnimatedCharacter
-  mov esi, character
-
-  invoke nrandom, SCREEN_X_MAX
-  invoke int2fxpt, eax
-  mov [esi].position.x, eax
-
-  invoke nrandom, 50
-  add eax, 100
-  invoke int2fxpt, eax
-  mov [esi].position.y, eax
-
-  invoke nrandom, TWO_PI
-  mov [esi].position.angular, eax
-
-  invoke nrandom, 01000h
-  mov [esi].velocity.angular, eax
-
-  invoke nrandom, 010000h
-  sub eax, 08000h
-  mov [esi].acceleration.x, eax
-
-  invoke nrandom, 010000h
-  sub eax, 08000h
-  mov [esi].acceleration.y, eax
-
-  ;invoke nrandom, 040000h
-  ;sub eax, 020000h
-  ;mov [esi].velocity.x, eax
-
-  ;invoke nrandom, 040000h
-  ;sub eax, 020000h
-  ;mov [esi].velocity.y, eax
-
-  invoke nrandom, 2
-  .if eax == 0
-    neg [esi].velocity.angular
-  .endif
-
-  ret
-Randomize ENDP
 
 ;===============================================================================
 ; Library Functions
@@ -782,15 +914,5 @@ GameInit PROC
 
 	ret
 GameInit ENDP
-
-;===============================================================================
-; Game State
-GameOver PROC
-; Called when the game ends, returns you to the selection screen
-;===============================================================================
-  mov pause, 1
-
-  ret
-GameOver ENDP
 
 END
